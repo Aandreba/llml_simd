@@ -31,7 +31,7 @@ impl<T> Deref for Simd<T> {
 
 #[derive(Debug)]
 pub enum SimdType {
-    x86 (SimdTypeX86),
+    X86 (SimdTypeX86),
     ARM
 }
 

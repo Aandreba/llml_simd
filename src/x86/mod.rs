@@ -94,6 +94,7 @@ pub fn f32x4 (x: f32, y: f32, z: f32, w: f32) -> Simd<__m128> {
 cfg_if! {
     if #[cfg(target_feature = "sse2")] {
         simd_map!(__m128d, f64, mm, pd);
+        flat_mod!(f64x2);
 
         #[inline(always)]
         pub fn f64x2 (x: f64, y: f64) -> Simd<__m128d> {
@@ -160,7 +161,7 @@ cfg_if! {
     if #[cfg(any(feature = "force-avx", target_feature = "avx"))] {
         /// Returns the newest architecture feature available to the compiler
         pub fn get_top_feature () -> SimdType {
-            SimdType::x86(SimdTypeX86::AVX)
+            SimdType::X86(SimdTypeX86::AVX)
         }
     } else if #[cfg(any(feature = "force-sse3", target_feature = "sse3"))] {
         /// Returns the newest architecture feature available to the compiler
