@@ -1,6 +1,7 @@
 use std::ops::{Add, Sub, Mul, Div, Index, IndexMut};
 use cfg_if::cfg_if;
 use crate::{Simd, Simdt, SimdType, SimdTypeX86};
+use crate::Simdable;
 
 macro_rules! use_x86 {
     () => {
@@ -29,8 +30,6 @@ macro_rules! simd_map {
     };
 
     ($name:ident, $type:ident) => {
-        impl Simdt<$type> for Simd<$name> {}
-
         impl Index<usize> for Simd<$name> {
             type Output = $type;
 
@@ -78,8 +77,9 @@ macro_rules! simd_map_arith {
     };
 }
 
-flat_mod!(f32x4);
+flat_mod!(f32x4, f32x8);
 simd_map!(__m128, f32, mm, ps);
+simdable!(f32);
 
 #[inline(always)]
 pub fn f32x2 (x: f32, y: f32) -> Simd<__m128> {
@@ -94,6 +94,7 @@ pub fn f32x4 (x: f32, y: f32, z: f32, w: f32) -> Simd<__m128> {
 cfg_if! {
     if #[cfg(target_feature = "sse2")] {
         simd_map!(__m128d, f64, mm, pd);
+        simdable!(f64);
         flat_mod!(f64x2);
 
         #[inline(always)]
@@ -121,6 +122,14 @@ cfg_if! {
         #[inline(always)]
         pub fn f64x4 (x: f64, y: f64, z: f64, w: f64) -> Simd<__m256d> {
             unsafe { Simd(_mm256_set_pd(x, y, z, w)) }
+        }
+    } else {
+        #[inline(always)]
+        pub fn f32x8 (
+            x: f32, y: f32, z: f32, w: f32,
+            a: f32, b: f32, c: f32, d: f32
+        ) -> Simd<[Simd<__m128>;2]> {
+            unsafe { Simd([_mm_set_ps(x, y, z, w), _mm_set_ps(a, b, c, d)]) }
         }
     }
 }

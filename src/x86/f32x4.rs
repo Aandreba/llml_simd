@@ -1,14 +1,16 @@
 use cfg_if::cfg_if;
-use crate::{Simd};
+use crate::{Simd, Simdt};
 use_x86!();
 
-impl Simd<__m128> {
+impl Simdt for Simd<__m128> {
+    type Item = f32;
+
     cfg_if! {
         if #[cfg(any(feature = "force-sse3", target_feature = "sse3"))] {
             /// Sums all the values inside
             /// [See](https://stackoverflow.com/questions/6996764/fastest-way-to-do-horizontal-sse-vector-sum-or-other-reduction)
             #[inline(always)]
-            pub fn sum (self) -> f32 {
+            fn sum (self) -> f32 {
                 unsafe {
                     let shuf = _mm_movehdup_ps(self.0);
                     let sums = _mm_add_ps(self.0, shuf);
@@ -21,7 +23,7 @@ impl Simd<__m128> {
             /// Multiplies all the values inside
             /// [See](https://stackoverflow.com/questions/6996764/fastest-way-to-do-horizontal-sse-vector-sum-or-other-reduction)
             #[inline(always)]
-            pub fn prod (self) -> f32 {
+            fn prod (self) -> f32 {
                 unsafe {
                     let shuf = _mm_movehdup_ps(self.0);
                     let sums = _mm_mul_ps(self.0, shuf);
@@ -34,7 +36,7 @@ impl Simd<__m128> {
             /// Sums all the values inside
             /// [See](https://stackoverflow.com/questions/6996764/fastest-way-to-do-horizontal-sse-vector-sum-or-other-reduction)
             #[inline(always)]
-            pub fn sum (self) -> f32 {
+            fn sum (self) -> f32 {
                 unsafe {
                     let shuf = _mm_shuffle_ps(self.0, self.0, _MM_SHUFFLE(2, 3, 0, 1));
                     let sums = _mm_add_ps(self.0, shuf);
@@ -47,7 +49,7 @@ impl Simd<__m128> {
             /// Multiplies all the values inside
             /// [See](https://stackoverflow.com/questions/6996764/fastest-way-to-do-horizontal-sse-vector-sum-or-other-reduction)
             #[inline(always)]
-            pub fn prod (self) -> f32 {
+            fn prod (self) -> f32 {
                 unsafe {
                     let shuf = _mm_shuffle_ps(self.0, self.0, _MM_SHUFFLE(2, 3, 0, 1));
                     let sums = _mm_mul_ps(self.0, shuf);

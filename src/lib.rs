@@ -1,5 +1,5 @@
-#![feature(repr_simd, concat_idents, stdsimd, stdarch)]
-use std::ops::Deref;
+#![feature(repr_simd, concat_idents, stdsimd, stdarch,associated_type_bounds)]
+use std::ops::{Deref, Add, Sub, Mul, Div};
 use cfg_if::cfg_if;
 
 macro_rules! flat_mod {
@@ -11,6 +11,14 @@ macro_rules! flat_mod {
     };
 }
 
+macro_rules! simdable {
+    ($($i:ident),+) => {
+        $(
+            impl Simdable for $i {}
+        )*
+    };
+}
+
 flat_mod!(simd);
 cfg_if! {
     if #[cfg(any(target_arch = "x86", target_arch = "x86_64"))] {
@@ -18,6 +26,7 @@ cfg_if! {
     }   
 }
 
+// SIMD Wrapper
 #[derive(Debug, Clone, Copy)]
 pub struct Simd<T> (pub(crate) T);
 
@@ -29,6 +38,7 @@ impl<T> Deref for Simd<T> {
     }
 } 
 
+// COMPILE FEATURES
 #[derive(Debug)]
 pub enum SimdType {
     X86 (SimdTypeX86),
@@ -46,3 +56,13 @@ pub enum SimdTypeX86 {
     AVX2,
     AVX512
 }
+
+// SIMDABLE PRIMITIVES
+pub trait Simdable where
+    Self:
+        Sized + 
+        Add<Output = Self> +
+        Sub<Output = Self> +
+        Mul<Output = Self> +
+        Div<Output = Self> +
+{}
