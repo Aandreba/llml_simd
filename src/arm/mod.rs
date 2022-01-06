@@ -243,7 +243,7 @@ macro_rules! simd_map_tag {
     };
 } 
 
-flat_mod!(prod);
+flat_mod!(tuple);
 simdable!(f32, f64);
 arm_use!();
 
@@ -267,6 +267,12 @@ pub fn f32x2 (x: f32, y: f32) -> Simd<float32x2_t> {
 pub fn f32x4 (x: f32, y: f32, z: f32, w: f32) -> Simd<float32x4_t> {
     unsafe {
         Simd(transmute([x, y, z, w]))
+    }
+}
+
+pub fn f32x8 (x: f32, y: f32, z: f32, w: f32, a: f32, b: f32, c: f32, d: f32) -> Simd<float32x4x2_t> {
+    unsafe {
+        Simd(transmute([x, y, z, w, a, b, c, d]))
     }
 }
 
