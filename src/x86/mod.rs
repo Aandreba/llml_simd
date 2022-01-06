@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub, Mul, Div, Index, IndexMut};
+use std::ops::{Add, Sub, Mul, Div, Neg, Index, IndexMut};
 use cfg_if::cfg_if;
 use crate::{Simd, Simdt, SimdType, SimdTypeX86};
 use crate::Simdable;
@@ -26,6 +26,15 @@ macro_rules! simd_map {
                 Mul, mul,
                 Div, div
             );
+
+            impl Neg for Simd<$name> {
+                type Output = Self;
+
+                #[inline(always)]
+                fn neg (self) -> Self {
+                    unsafe { Simd(concat_idents!(_, $sub, _sub_, $post)(concat_idents!(_, $sub, _, setzero, _, $post)(), self.0)) }
+                }
+            }
         )*
     };
 
