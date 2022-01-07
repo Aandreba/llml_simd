@@ -18,7 +18,6 @@ impl Simdt for Simd<__m256> {
     }
 
     /// Multiplies all the values inside
-    /// [See](https://stackoverflow.com/questions/6996764/fastest-way-to-do-horizontal-sse-vector-sum-or-other-reduction)
     #[inline(always)]
     fn prod (self) -> f32 {
         unsafe {
@@ -26,6 +25,28 @@ impl Simdt for Simd<__m256> {
             let vhigh = _mm256_extractf128_ps(self.0, 1);
             let vlow = _mm_mul_ps(vlow, vhigh);
             Simd(vlow).prod()
+        }
+    }
+
+    #[inline(always)]
+    /// Finds the smallest value inside
+    fn min (self) -> f32 {
+        unsafe {
+            let vlow  = _mm256_castps256_ps128(self.0);
+            let vhigh = _mm256_extractf128_ps(self.0, 1);
+            let vlow = _mm_min_ps(vlow, vhigh);
+            Simd(vlow).min()
+        }
+    }
+
+    #[inline(always)]
+    /// Finds the biggest value inside
+    fn max (self) -> f32 {
+        unsafe {
+            let vlow  = _mm256_castps256_ps128(self.0);
+            let vhigh = _mm256_extractf128_ps(self.0, 1);
+            let vlow = _mm_max_ps(vlow, vhigh);
+            Simd(vlow).max()
         }
     }
 }

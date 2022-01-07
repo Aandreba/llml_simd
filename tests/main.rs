@@ -1,12 +1,13 @@
-use llml_simd::{get_top_feature, Simdt, f32x8};
+use std::f32::consts::{PI, E};
+use llml_simd::{get_top_feature, Simdt, f32x32};
+use rand::random;
 
 #[test]
 pub fn me () {
     let target = get_top_feature();
     println!("{:?}", target);
     
-    let alpha = f32x8(1., 2., 3., 4., 5., 6., 7., 8.);
-    let sum = alpha.sum();
-    let prod = alpha.prod();
-    println!("{:?} {:?}", sum, prod);
+    let alpha = f32x32(random());
+    println!("{:?} {:?}", alpha.min(), alpha.max());
+    println!("{:?}", alpha)
 }
