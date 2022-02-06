@@ -4,14 +4,15 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-#force-avx2 = ["force-avx"]
-#force-avx = ["force-sse3"]
-force-sse3 = []
+use-naive = []
+use-sse3 = []
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 cfg-if = "1.0.0"
+derive_more = "0.99"
+llml_simd_proc = { version = "0.1", path = "./llml_simd_proc" }
 
 [dev-dependencies]
 criterion = "0.3"

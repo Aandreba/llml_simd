@@ -1,13 +1,8 @@
-use std::f32::consts::{PI, E};
-use llml_simd::{get_top_feature, Simdt, f32x32};
-use rand::random;
+use llml_simd::float::single::f32x14;
 
 #[test]
 pub fn me () {
-    let target = get_top_feature();
-    println!("{:?}", target);
-    
-    let alpha = f32x32(random());
-    println!("{:?} {:?}", alpha.min(), alpha.max());
-    println!("{:?}", alpha)
+    let mut alex = f32x14::new([1., 2., 3., 4.]);
+    alex += 2.;
+    println!("{alex:?}")
 }
