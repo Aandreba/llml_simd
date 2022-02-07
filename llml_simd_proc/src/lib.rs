@@ -1,5 +1,5 @@
-include!("assign.rs");
-use quote::quote;
+use proc_macro2::{Literal, TokenStream};
+use quote::{quote, ToTokens};
 use syn::*;
 
 #[proc_macro_attribute]
@@ -74,4 +74,49 @@ fn assign_macro_impl (target: Ident, generics: Generics, original: Ident, rhs: I
             } 
         } 
     }
+}
+
+// ARRAY GENERATOR
+use syn::parse::Parse;
+use syn::punctuated::Punctuated;
+use syn::token::Comma;
+
+struct ArrInput {
+    expr: Expr,
+    len: Lit
+}
+
+impl Parse for ArrInput {
+    fn parse(input: parse::ParseStream) -> Result<Self> {
+        let expr = input.parse::<Expr>()?;
+        input.parse::<Token![;]>()?;
+            
+        Ok(ArrInput {
+            expr,
+            len: input.parse::<Lit>()?
+        })
+    }
+}
+
+#[proc_macro]
+pub fn arr (input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let input = parse_macro_input!(input as ArrInput);
+
+    let len = match input.len {
+        Lit::Int(x) => x.base10_parse::<usize>().unwrap(),
+        _ => panic!("Only integers are valid as array lengths")
+    };
+
+    let expresions = (0..len).into_iter()
+        .map(|i| match input.expr.clone() {
+            Expr::Lit(lit) => lit.into_token_stream(),
+            Expr::Closure(c) => {
+                assert!(c.inputs.len() == 1 && matches!(&c.inputs[0], Ident), "Invalid expresion");
+                parse_quote! { (#c)(#i) }
+            },
+            _ => panic!("Invalid array input")
+        }).collect::<Punctuated<TokenStream, Comma>>();
+
+    let output = quote! { [#expresions] };
+    output.into()
 }

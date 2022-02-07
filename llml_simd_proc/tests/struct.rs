@@ -1,5 +1,5 @@
 use std::ops::*;
-use llml_simd_proc::{Assign, assign_targets, assign_rhs};
+use llml_simd_proc::{Assign, assign_targets, assign_rhs, arr};
 
 macro_rules! impl_arith {
     ($($trait:ident, $fun:ident),+) => {
@@ -58,4 +58,10 @@ fn div () {
     let mut test = TestStruct { first: 1, last: 2. };
     test /= TestStruct { first: 2, last: 1. };
     assert_eq!(test, TestStruct { first: 0, last: 2. })
+}
+
+#[test]
+fn array () {
+    let array = arr![|i| 2 * i + 1 ; 14];
+    println!("{:?}", array);
 }

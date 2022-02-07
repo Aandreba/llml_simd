@@ -116,6 +116,25 @@ macro_rules! impl_composite {
         )*
     };
 
+    (@arith3 $target:ident, $ty:ident, $($trait:ident, $fun:ident),+) => {
+        $(
+            impl $trait for $target {
+                type Output = Self;
+    
+                #[inline(always)]
+                fn $fun (self, rhs: Self) -> Self::Output {
+                    Self(
+                        self.0.$fun(rhs.0),
+                        self.1.$fun(rhs.1),
+                        self.2.$fun(rhs.2),
+                    )
+                }
+            }
+
+            impl_scal_arith!($target, $ty, $trait, $fun);
+        )*
+    };
+
     ($(($x:ident => $lx:literal, $y:ident => $ly:literal) as $name:ident: $ty:ident),*) => {
         $(
             #[allow(non_camel_case_types)]
@@ -170,12 +189,68 @@ macro_rules! impl_composite {
             }
         )*
     };
+
+    ($(($x:ident => $lx:literal, $y:ident => $ly:literal, $z:ident => $lz:literal) as $name:ident: $ty:ident),*) => {
+        $(
+            #[allow(non_camel_case_types)]
+            #[derive(Clone, Copy, Assign, Neg, PartialEq)]
+            #[assign_targets(Add, Sub, Mul, Div)]
+            #[assign_rhs(Self, $ty)]
+            pub struct $name($x, $y, $z);
+    
+            impl_composite!(
+                @arith3 $name, $ty,
+                Add, add,
+                Sub, sub,
+                Mul, mul,
+                Div, div
+            );
+
+            impl $name {
+                /// Loads values from the pointer into the SIMD vector
+                #[inline(always)]
+                pub unsafe fn load (ptr: *const $ty) -> Self {
+                    Self (
+                        <$x>::load(ptr),
+                        <$y>::load(ptr.add($lx)),
+                        <$z>::load(ptr.add($lx + $ly))
+                    )
+                }
+
+                impl_self_fns!(
+                    $ty,
+                    abs: "absolute values",
+                    sqrt: "square roots"
+                );
+
+                impl_hoz_fns!(
+                    $ty,
+                    min: "Gets the smallest/minimum value of the vector",
+                    max: "Gets the biggest/maximum value of the vector",
+                    add as sum: "Sums up all the values inside the vector"
+                );
+
+                impl_other_fns!(
+                    $ty,
+                    min as vmin: "smallest/minimum value",
+                    max as vmax: "biggest/maximum value"
+                );
+            }
+    
+            impl From<$ty> for $name {
+                #[inline(always)]
+                fn from(x: $ty) -> Self {
+                    Self(x.into(), x.into())
+                }
+            }
+        )*
+    };
 }
 
 impl_composite!(
     (f32x4 => 4, f32x2 => 2) as f32x6: f32,
     (f32x4 => 4, f32x4 => 4) as f32x8: f32,
-    (f32x6 => 4, f32x4 => 6) as f32x10: f32,
+    (f32x4 => 4, f32x6 => 6) as f32x10: f32,
     (f32x6 => 6, f32x6 => 6) as f32x12: f32,
     (f32x6 => 6, f32x8 => 8) as f32x14: f32,
     (f32x8 => 8, f32x8 => 8) as f32x16: f32

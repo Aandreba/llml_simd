@@ -32,10 +32,13 @@ cfg_if! {
         mod naive;
     } else if #[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "sse"))] {
         mod x86;
+        flat_mod!(generics);
     } else if #[cfg(all(any(target_arch = "arm", target_arch = "aarch64"), target_feature = "neon"))] {
         mod arm;
+        flat_mod!(generics);
     } else if #[cfg(all(target_arch = "wasm32", target_feature = "simd128"))] {
         mod wasm;
+        flat_mod!(generics);
     } else {
         mod naive;
     }
@@ -53,5 +56,3 @@ pub mod float {
         import!(f64x2, f64x4, f64x6, f64x8, f64x10, f64x12, f64x14, f64x16);
     }
 }
-
-flat_mod!(generics);
