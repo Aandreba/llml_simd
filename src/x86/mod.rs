@@ -2,25 +2,33 @@ macro_rules! arch_use {
     () => {
         cfg_if::cfg_if! {
             if #[cfg(target_arch = "x86")] {
-                use std::arch::x86::*;
+                use core::arch::x86::*;
             } else {
-                use std::arch::x86_64::*;
+                use core::arch::x86_64::*;
             }
         }
     };
 }
 
 macro_rules! _mm_concat {
-    ($fun:ident, f32, $($tag:ident)?) => {
-        _mm_concat!(@internal $fun, s, $($tag)?)
+    ($fun:ident, f32,) => {
+        _mm_concat!(@internal $fun, s, m)
     };
 
-    ($fun:ident, f64, $($tag:ident)?) => {
-        _mm_concat!(@internal $fun, d, $($tag)?)
+    ($fun:ident, f32, $tag:ident) => {
+        _mm_concat!(@internal $fun, s, $tag)
     };
 
-    (@internal $fun:ident, $label:ident, $($tag:ident)?) => {
-        concat_idents!(_mm_, $($tag,)? $fun, _p, $label)
+    ($fun:ident, f64,) => {
+        _mm_concat!(@internal $fun, d, m)
+    };
+
+    ($fun:ident, f64, $tag:ident) => {
+        _mm_concat!(@internal $fun, d, $tag)
+    };
+
+    (@internal $fun:ident, $label:ident, $tag:ident) => {
+        concat_idents!(_m, $tag, _, $fun, _p, $label)
     }
 }
 
@@ -59,27 +67,33 @@ macro_rules! abs_mask {
 }
 
 macro_rules! impl_hoz_fns_straight {
-    ($ty:ident, $($fun:ident $(as $name:ident)? $(with $tag:ident)?: $docs:expr),+) => {
+    ($ty:ident, $($fun:ident $(as $name:ident)? with $tag:ident: $docs:expr),+) => {
         $(
-            impl_hoz_fns_straight!(1, $fun $(,$name)?, $ty, $docs ,$($tag)?);
+            impl_hoz_fns_straight!(1, $fun $(,$name)?, $ty, $docs, $tag);
         )*
     };
 
-    (1, $fun:ident, $name:ident, f32, $docs:expr, $($tag:ident)?) => {
+    ($ty:ident, $($fun:ident $(as $name:ident)?: $docs:expr),+) => {
+        $(
+            impl_hoz_fns_straight!(1, $fun $(,$name)?, $ty, $docs, m);
+        )*
+    };
+
+    (1, $fun:ident, $name:ident, f32, $docs:expr, $tag:ident) => {
         #[doc=$docs]
         #[inline(always)]
         pub fn $name (self) -> f32 {
             unsafe {
                 #[cfg(target_feature = "sse3")]
-                let shuf = _mm_conat!(movehdup, $ty, $($tag)?)(self.0);
+                let shuf = _mm_conat!(movehdup, $ty, $tag)(self.0);
                 #[cfg(not(target_feature = "sse3"))]
-                let shuf = _mm_concat!(shuffle, f32, $($tag)?)(self.0, self.0, _MM_SHUFFLE(2, 3, 0, 1));
+                let shuf = _mm_concat!(shuffle, f32, $tag)(self.0, self.0, _MM_SHUFFLE(2, 3, 0, 1));
 
-                let sums = _mm_concat!($fun, f32, $($tag)?)(self.0, shuf);
-                let shuf = _mm_concat!(movehl, f32, $($tag)?)(shuf, sums);
-                let sums = _mm_concat!($fun, f32, $($tag)?)(sums, shuf);
+                let sums = _mm_concat!($fun, f32, $tag)(self.0, shuf);
+                let shuf = _mm_concat!(movehl, f32, $tag)(shuf, sums);
+                let sums = _mm_concat!($fun, f32, $tag)(sums, shuf);
 
-                impl_hoz_fns_straight!(@cvt f32, $($tag)?)(sums)
+                impl_hoz_fns_straight!(@cvt f32, $tag)(sums)
             }
         }
     };
@@ -96,12 +110,12 @@ macro_rules! impl_hoz_fns_straight {
         impl_hoz_fns_straight!(1, $fun, $fun, $ty, $docs, $($tag)?);
     };
 
-    (@cvt f32, $($tag:ident)?) => {
-        concat_idents!(_mm, $($tag,)? _cvtss_f32)
+    (@cvt f32, $tag:ident) => {
+        concat_idents!(_m, $tag, _cvtss_f32)
     };
 
-    (@cvt f64, $($tag:ident)?) => {
-        concat_idents!(_mm, $($tag,)? _cvtsd_f64)
+    (@cvt f64, $tag:ident) => {
+        concat_idents!(_m, $tag, _cvtsd_f64)
     };
 }
 
@@ -223,11 +237,14 @@ macro_rules! impl_straight {
 use cfg_if::cfg_if;
 mod sse;
 
-cfg_if! {
+/*cfg_if! {
     if #[cfg(all(feature = "use_avx", target_feature = "avx"))] {
         flat_mod!(avx);
         pub use self::sse::{f32x2, f32x4, f64x2};
     } else {
         pub use self::sse::*;
     }
-}
+}*/
+
+flat_mod!(avx);
+pub use self::sse::{f32x2, f32x4, f64x2};

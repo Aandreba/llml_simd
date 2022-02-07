@@ -3,20 +3,6 @@ use crate::float::single::*;
 use crate::float::double::*;
 use core::ptr::addr_of;
 use core::ops::*;
-use cfg_if::cfg_if;
-
-macro_rules! impl_clone {
-    ($($target:ident, $ty:ident, $len:literal),+) => {
-        $(
-            impl Clone for $target {
-                #[inline(always)]
-                fn clone(&self) -> Self {
-                    unsafe { Self::load(self as *const Self as *const $ty) }
-                }
-            }
-        )*
-    };
-}
 
 macro_rules! impl_generic {
     ($($target:ident, $ty:ident, $len:literal),+) => {
@@ -35,7 +21,7 @@ macro_rules! impl_generic {
             }
 
             impl Debug for $target {
-                fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
                     let array : [$ty;$len] = self.clone().into();
                     f.debug_list().entries(array).finish()
                 }

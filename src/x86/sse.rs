@@ -14,7 +14,6 @@ impl_straight!(
 impl_composite!(
     (f32x4 => 4, f32x2 => 2) as f32x6: f32,
     (f32x4 => 4, f32x4 => 4) as f32x8: f32,
-
     (f64x2 => 2, f64x2 => 2) as f64x4: f64,
     (f64x4 => 4, f64x2 => 2) as f64x6: f64,
     (f64x4 => 4, f64x4 => 4) as f64x8: f64,

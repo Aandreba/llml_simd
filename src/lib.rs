@@ -1,5 +1,6 @@
 #![feature(concat_idents, exclusive_range_pattern)]
 #![cfg_attr(target_feature = "sse", feature(stdarch))]
+#![no_std]
 
 use cfg_if::cfg_if;
 macro_rules! flat_mod {
@@ -26,6 +27,19 @@ macro_rules! import {
                 $(pub use crate::naive::$i;)*
             }
         }
+    };
+}
+
+macro_rules! impl_clone {
+    ($($target:ident, $ty:ident, $len:literal),+) => {
+        $(
+            impl Clone for $target {
+                #[inline(always)]
+                fn clone(&self) -> Self {
+                    unsafe { Self::load(self as *const Self as *const $ty) }
+                }
+            }
+        )*
     };
 }
 

@@ -174,7 +174,7 @@ macro_rules! impl_composite {
             impl From<$ty> for $name {
                 #[inline(always)]
                 fn from(x: $ty) -> Self {
-                    Self(x.into(), x.into())
+                    Self(Into::<$x>::into(x), Into::<$y>::into(x))
                 }
             }
         )*
