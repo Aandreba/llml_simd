@@ -1,4 +1,6 @@
 #![feature(concat_idents, exclusive_range_pattern)]
+#![cfg_attr(target_feature = "sse", feature(stdarch))]
+
 use cfg_if::cfg_if;
 macro_rules! flat_mod {
     ($($i:ident),+) => {
@@ -26,6 +28,8 @@ macro_rules! import {
         }
     };
 }
+
+include!("composite.rs");
 
 cfg_if! {
     if #[cfg(target = "use_naive")] {

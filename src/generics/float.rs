@@ -1,7 +1,8 @@
-use crate::arm::*;
-use std::fmt::Debug;
-use std::ops::*;
-use std::ptr::addr_of;
+use core::fmt::Debug;
+use crate::float::single::*;
+use crate::float::double::*;
+use core::ptr::addr_of;
+use core::ops::*;
 use cfg_if::cfg_if;
 
 macro_rules! impl_clone {
@@ -58,7 +59,7 @@ macro_rules! impl_generic {
     };
 }
 
-macro_rules! impl_non_x86 {
+macro_rules! impl_index {
     ($($target:ident, $ty:ident, $len:literal),+) => {
         $(
             impl $target {
@@ -128,28 +129,22 @@ impl_clone!(
     f64x2, f64, 2
 );
 
-cfg_if! {
-    if #[cfg(any(target_arch = "x86", target_arch = "x86_64"))] {
-        todo!()
-    } else {
-        impl_non_x86!(
-            f32x2, f32, 2,
-            f32x4, f32, 4,
-            f32x6, f32, 6,
-            f32x8, f32, 8,
-            f32x10, f32, 10,
-            f32x12, f32, 12,
-            f32x14, f32, 14,
-            f32x16, f32, 16,
+impl_index!(
+    f32x2, f32, 2,
+    f32x4, f32, 4,
+    f32x6, f32, 6,
+    f32x8, f32, 8,
+    f32x10, f32, 10,
+    f32x12, f32, 12,
+    f32x14, f32, 14,
+    f32x16, f32, 16,
 
-            f64x2, f64, 2,
-            f64x4, f64, 4,
-            f64x6, f64, 6,
-            f64x8, f64, 8,
-            f64x10, f64, 10,
-            f64x12, f64, 12,
-            f64x14, f64, 14,
-            f64x16, f64, 16
-        );
-    }
-}
+    f64x2, f64, 2,
+    f64x4, f64, 4,
+    f64x6, f64, 6,
+    f64x8, f64, 8,
+    f64x10, f64, 10,
+    f64x12, f64, 12,
+    f64x14, f64, 14,
+    f64x16, f64, 16
+);
