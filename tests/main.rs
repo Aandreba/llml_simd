@@ -1,5 +1,6 @@
 use llml_simd::float::single::*;
 use llml_simd::float::double::*;
+use llml_simd_proc::arr;
 use core::ops::*;
 use rand::random;
 
@@ -55,21 +56,5 @@ test_other!(add, sub, mul, div);
 
 #[test]
 fn rand_test () {
-    let alpha : [f32;4] = random();
-    let beta : [f32;4] = random();
-    let first_array = alpha[0];
-
-    let naive = alpha.into_iter()
-        .zip(beta.into_iter())
-        .map(|(x, y)| x.add(y));
-
-    let alpha = f32x4::new(alpha);
-    let beta = f32x4::new(beta);
-    let simd = alpha.add(beta);
-
-    let first_simd = alpha[3];
-    Into::<[f32;4]>::into(simd)
-        .into_iter()
-        .zip(naive)
-        .for_each(|(simd, naive)| assert_eq!(simd, naive));
+    let test = arr![|i| i * 2;3];
 }
