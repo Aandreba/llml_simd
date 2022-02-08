@@ -1,5 +1,5 @@
 #![feature(concat_idents, exclusive_range_pattern)]
-#![cfg_attr(target_feature = "sse", feature(stdarch))]
+#![cfg_attr(target_feature = "sse", feature(stdarch, stdsimd))]
 #![no_std]
 
 use cfg_if::cfg_if;

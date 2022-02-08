@@ -53,8 +53,3 @@ macro_rules! test_other {
 }
 
 test_other!(add, sub, mul, div);
-
-#[test]
-fn rand_test () {
-    let test = arr![|i| i * 2;3];
-}

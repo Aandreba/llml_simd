@@ -163,6 +163,24 @@ fn replace_ident (expr: impl Into<Expr>, find: Ident, replace: Lit) -> Expr {
             Expr::Path(path)
         },
 
+        Expr::Unary(mut unary) => {
+            unary.expr = Box::new(replace_ident(*unary.expr, find.clone(), replace.clone()));
+            Expr::Unary(unary)
+        },
+
+        Expr::MethodCall(mut call) => {
+            call.receiver = Box::new(replace_ident(*call.receiver, find.clone(), replace.clone()));
+            call.args = call.args.into_iter()
+                .map(|elem| replace_ident(elem, find.clone(), replace.clone()))
+                .collect::<Punctuated<Expr, Comma>>();
+            Expr::MethodCall(call)
+        },
+
+        Expr::Group(mut group) => {
+            group.expr = Box::new(replace_ident(*group.expr, find.clone(), replace.clone()));
+            Expr::Group(group)
+        }
+
         Expr::Lit(lit) => Expr::Lit(lit),
         expr => panic!("Unidentified expression: {expr:?}")
     }

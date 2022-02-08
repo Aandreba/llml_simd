@@ -65,7 +65,7 @@ macro_rules! impl_straight {
             impl PartialEq for $target {
                 #[inline(always)]
                 fn eq (&self, rhs: &Self) -> bool {
-                    let cmp : u128 = unsafe { transmute(_mm_concat!(cmpeq, $ty)(self.0, rhs.0)) };
+                    let cmp : u128 = unsafe { transmute(_mm_concat!(cmp, $ty)(self.0, rhs.0, _MM_CMPINT_EQ)) };
                     cmp == u128::MAX
                 }
             }
@@ -109,7 +109,7 @@ macro_rules! impl_straight {
             impl From<$ty> for $target {
                 #[inline(always)]
                 fn from (x: $ty) -> Self {
-                    unsafe { Self(_mm_concat!(set1, $ty, $($tag)?)(x)) }
+                    unsafe { Self(_mm_concat!(set1, $ty)(x)) }
                 }
             }
         )*
