@@ -164,6 +164,19 @@ macro_rules! test_index {
     }
 }
 
+macro_rules! test_into {
+    ($([$ty:ident;$len:literal] as $target:ident),+) => {
+        $(
+            let array : [$ty;$len] = random();
+            let simd = $target::from(array);
+
+            for i in 0..$len {
+                assert_eq!(array[i], simd[i], concat!("Assertion failed for '", stringify!($target), "'"));
+            }
+        )*
+    }
+}
+
 test_other!(
     add, sub, mul, div, 
     min as vmin, max as vmax
@@ -198,4 +211,9 @@ pub fn index () {
         [f64;14] as f64x14,
         [f64;16] as f64x16
     );
+}
+
+#[test]
+pub fn into () {
+
 }

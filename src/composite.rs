@@ -312,12 +312,33 @@ macro_rules! impl_composite {
                     sqrt: "square roots"
                 );
 
-                impl_hoz_fns!(
+                #[doc="Gets the smallest/minimum value of the vector"]
+                #[inline(always)]
+                pub fn min (self) -> $ty {
+                    let array = [self.0.min(), self.1.min(), self.2.min(), $ty::MAX];
+                    <concat_idents!($ty, x4)>::from(array).min()
+                }
+
+                #[doc="Gets the biggest/maximum value of the vector"]
+                #[inline(always)]
+                pub fn max (self) -> $ty {
+                    let array = [self.0.max(), self.1.max(), self.2.max(), $ty::MIN];
+                    <concat_idents!($ty, x4)>::from(array).max()
+                }
+
+                #[doc="Sums up all the values inside the vector"]
+                #[inline(always)]
+                pub fn sum (self) -> $ty {
+                    let array = [self.0.sum(), self.1.sum(), self.2.sum(), 0.];
+                    <concat_idents!($ty, x4)>::from(array).sum()
+                }
+
+                /*impl_hoz_fns!(
                     3, $ty,
                     min, "Gets the smallest/minimum value of the vector",
                     max, "Gets the biggest/maximum value of the vector",
                     sum, "Sums up all the values inside the vector"
-                );
+                );*/
 
                 impl_other_fns!(
                     3,

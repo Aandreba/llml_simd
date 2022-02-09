@@ -5,13 +5,17 @@ edition = "2021"
 
 [features]
 force_naive = []
-use_sse3 = []
+use_avx = []
+random = ["rand"]
+serialize = ["serde"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 cfg-if = "1.0.0"
 derive_more = "0.99"
+rand = { version = "0.8", optional = true }
+serde = { version = "1.0", optional = true }
 llml_simd_proc = { version = "0.1", path = "./llml_simd_proc" }
 
 [dev-dependencies]
