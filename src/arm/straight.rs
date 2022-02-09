@@ -1,6 +1,6 @@
-use std::ops::*;
+use core::ops::*;
 use llml_simd_proc::{assign_targets, assign_rhs, Assign};
-use std::mem::transmute;
+use core::mem::transmute;
 arch_use!();
 
 macro_rules! impl_arith {

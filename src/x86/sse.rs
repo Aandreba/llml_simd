@@ -48,7 +48,7 @@ macro_rules! impl_hoz_fns_straight {
         pub fn $name (self) -> f32 {
             unsafe {
                 #[cfg(target_feature = "sse3")]
-                let shuf = _mm_conat!(movehdup, $ty)(self.0);
+                let shuf = _mm_concat!(movehdup, f32)(self.0);
                 #[cfg(not(target_feature = "sse3"))]
                 let shuf = _mm_concat!(shuffle, f32)(self.0, self.0, _MM_SHUFFLE(2, 3, 0, 1));
 
@@ -61,7 +61,7 @@ macro_rules! impl_hoz_fns_straight {
         }
     };
 
-    (1, $fun:ident, $name:ident, f64, $docs:expr, $($tag:ident)?) => {
+    (1, $fun:ident, $name:ident, f64, $docs:expr) => {
         #[doc=$docs]
         #[inline(always)]
         pub fn $name (self) -> f64 {
@@ -117,7 +117,7 @@ macro_rules! impl_straight {
             #[derive(Copy, Assign)]
             #[assign_targets(Add, Sub, Mul, Div)]
             #[assign_rhs(Self, $ty)]
-            pub struct $target($og);
+            pub struct $target(pub(crate) $og);
             impl_straight!(
                 @arith $target, $ty,
                 Add, add,
@@ -149,7 +149,7 @@ macro_rules! impl_straight {
                 /// Loads values from the pointer into the SIMD vector
                 #[inline(always)]
                 pub unsafe fn load (ptr: *const $ty) -> Self {
-                    let reverse = arr![|i| *ptr.add($len - i); $len];
+                    let reverse = arr![|i| *ptr.add($len - 1 - i); $len];
                     Self(_mm_concat!(loadu, $ty)(addr_of!(reverse).cast()))
                 }
 
@@ -174,7 +174,11 @@ macro_rules! impl_straight {
                 impl_hoz_fns_straight!(
                     $ty,
                     min: "Gets the smallest/minimum value of the vector",
-                    max: "Gets the biggest/maximum value of the vector",
+                    max: "Gets the biggest/maximum value of the vector"
+                );
+
+                impl_hoz_fns_straight!(
+                    $ty,
                     add as sum: "Sums up all the values inside the vector"
                 );
             }

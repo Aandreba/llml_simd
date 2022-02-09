@@ -1,29 +1,85 @@
-macro_rules! impl_hoz_fns {
-    ($ty:ident, $($fun:ident $(as $name:ident)?: $docs:expr),+) => {
+macro_rules! impl_scal_arith {
+    ($target:ident, $ty:ident, $($trait:ident, $fun:ident),+) => {
         $(
-            impl_hoz_fns!(1, $fun $(,$name)?, $ty, $docs);
+            impl $trait<$ty> for $target {
+                type Output = Self;
+    
+                #[inline(always)]
+                fn $fun (self, rhs: $ty) -> Self::Output {
+                    self.$fun(Into::<$target>::into(rhs))
+                }
+            }
+
+            impl $trait<$target> for $ty {
+                type Output = $target;
+    
+                #[inline(always)]
+                fn $fun (self, rhs: $target) -> Self::Output {
+                    Into::<$target>::into(self).$fun(rhs)
+                }
+            }
+        )*
+    };
+}
+
+macro_rules! impl_hoz_fns {
+    (2, $ty:ident, $($fun:ident as $name:ident, $docs:expr),+) => {
+        $(
+            #[doc=$docs]
+            #[inline(always)]
+            pub fn $name (self) -> $ty {
+                self.0.$name().$fun(self.1.$name())
+            }
         )*
     };
 
-    (1, $fun:ident, $ty:ident, $docs:expr) => {
-        #[doc=$docs]
-        #[inline(always)]
-        pub fn $fun (self) -> $ty {
-            self.0.$fun().$fun(self.1.$fun())
-        }
+    (3, f32, $($fun:ident, $docs:expr),+) => {
+        $(
+            #[doc=$docs]
+            #[inline(always)]
+            pub fn $fun (self) -> f32 {
+                let array = [self.0.$fun(), self.1.$fun(), self.2.$fun(), 0.];
+                f32x4::from(array).$fun()
+            }
+        )*
     };
 
-    (1, $fun:ident, $name:ident, $ty:ident, $docs:expr) => {
-        #[doc=$docs]
-        #[inline(always)]
-        pub fn $name (self) -> $ty {
-            self.0.$name().$fun(self.1.$name())
-        }
+    (4, f32, $($fun:ident, $docs:expr),+) => {
+        $(
+            #[doc=$docs]
+            #[inline(always)]
+            pub fn $fun (self) -> f32 {
+                let array = [self.0.$fun(), self.1.$fun(), self.2.$fun(), self.3.$fun()];
+                f32x4::from(array).$fun()
+            }
+        )*
+    };
+
+    (3, f64, $($fun:ident, $docs:expr),+) => {
+        $(
+            #[doc=$docs]
+            #[inline(always)]
+            pub fn $fun (self) -> f64 {
+                let array = [self.0.$fun(), self.1.$fun(), self.2.$fun(), 0.];
+                f64x4::from(array).$fun()
+            }
+        )*
+    };
+
+    (4, f64, $($fun:ident, $docs:expr),+) => {
+        $(
+            #[doc=$docs]
+            #[inline(always)]
+            pub fn $fun (self) -> f64 {
+                let array = [self.0.$fun(), self.1.$fun(), self.2.$fun(), self.3.$fun()];
+                f64x4::from(array).$fun()
+            }
+        )*
     };
 }
 
 macro_rules! impl_self_fns {
-    ($ty:ident, $($fun:ident $(with $tag:ident)?: $docs:expr),+) => {
+    (2, $ty:ident, $($fun:ident $(with $tag:ident)?: $docs:expr),+) => {
         $(
             #[doc=concat!("Returns a vector with the ", $docs, " of the original vector")]
             #[inline(always)]
@@ -34,36 +90,79 @@ macro_rules! impl_self_fns {
                 )
             }
         )*
+    };
+
+    (3, $ty:ident, $($fun:ident $(with $tag:ident)?: $docs:expr),+) => {
+        $(
+            #[doc=concat!("Returns a vector with the ", $docs, " of the original vector")]
+            #[inline(always)]
+            pub fn $fun (self) -> Self {
+                Self (
+                    self.0.$fun(),
+                    self.1.$fun(),
+                    self.2.$fun()
+                )
+            }
+        )*
+    };
+
+    (4, $ty:ident, $($fun:ident $(with $tag:ident)?: $docs:expr),+) => {
+        $(
+            #[doc=concat!("Returns a vector with the ", $docs, " of the original vector")]
+            #[inline(always)]
+            pub fn $fun (self) -> Self {
+                Self (
+                    self.0.$fun(),
+                    self.1.$fun(),
+                    self.2.$fun(),
+                    self.3.$fun()
+                )
+            }
+        )*
     }
 }
 
 macro_rules! impl_other_fns {
-    ($ty:ident, $($fun:ident $(as $name:ident)? $(with $tag:ident)?: $docs:expr),+) => {
+    (2, $($fun:ident, $docs:expr),+) => {
         $(
-            impl_other_fns!(1, $fun $(, $name)?, $ty, $docs, $($tag)?);
+            #[doc=concat!("Returns a vector with the ", $docs, " of each lane")]
+            #[inline(always)]
+            pub fn $fun (self, rhs: Self) -> Self {
+                Self (
+                    self.0.$fun(rhs.0),
+                    self.1.$fun(rhs.1)
+                )
+            }
         )*
     };
 
-    (1, $fun:ident, $ty:ident, $docs:expr, $($tag:ident)?) => {
-        #[doc=concat!("Returns a vector with the ", $docs, " of each lane")]
-        #[inline(always)]
-        pub fn $fun (self, rhs: Self) -> Self {
-            Self (
-                self.0.$fun(rhs.0),
-                self.1.$fun(rhs.1)
-            )
-        }
+    (3, $($fun:ident, $docs:expr),+) => {
+        $(
+            #[doc=concat!("Returns a vector with the ", $docs, " of each lane")]
+            #[inline(always)]
+            pub fn $fun (self, rhs: Self) -> Self {
+                Self (
+                    self.0.$fun(rhs.0),
+                    self.1.$fun(rhs.1),
+                    self.2.$fun(rhs.2)
+                )
+            }
+        )*
     };
 
-    (1, $fun:ident, $name:ident, $ty:ident, $docs:expr, $($tag:ident)?) => {
-        #[doc=concat!("Returns a vector with the ", $docs, " of each lane")]
-        #[inline(always)]
-        pub fn $name (self, rhs: Self) -> Self {
-            Self (
-                self.0.$name(rhs.0),
-                self.1.$name(rhs.1)
-            )
-        }
+    (4, $($fun:ident, $docs:expr),+) => {
+        $(
+            #[doc=concat!("Returns a vector with the ", $docs, " of each lane")]
+            #[inline(always)]
+            pub fn $fun (self, rhs: Self) -> Self {
+                Self (
+                    self.0.$fun(rhs.0),
+                    self.1.$fun(rhs.1),
+                    self.2.$fun(rhs.2),
+                    self.3.$fun(rhs.3)
+                )
+            }
+        )*
     };
 }
 
@@ -152,22 +251,22 @@ macro_rules! impl_composite {
                 }
 
                 impl_self_fns!(
-                    $ty,
+                    2, $ty,
                     abs: "absolute values",
                     sqrt: "square roots"
                 );
 
                 impl_hoz_fns!(
-                    $ty,
-                    min: "Gets the smallest/minimum value of the vector",
-                    max: "Gets the biggest/maximum value of the vector",
-                    add as sum: "Sums up all the values inside the vector"
+                    2, $ty,
+                    min as min, "Gets the smallest/minimum value of the vector",
+                    max as max, "Gets the biggest/maximum value of the vector",
+                    add as sum, "Sums up all the values inside the vector"
                 );
 
                 impl_other_fns!(
-                    $ty,
-                    min as vmin: "smallest/minimum value",
-                    max as vmax: "biggest/maximum value"
+                    2,
+                    vmin, "smallest/minimum value",
+                    vmax, "biggest/maximum value"
                 );
             }
     
@@ -207,24 +306,24 @@ macro_rules! impl_composite {
                     )
                 }
 
-                /*impl_self_fns!(
-                    $ty,
+                impl_self_fns!(
+                    3, $ty,
                     abs: "absolute values",
                     sqrt: "square roots"
                 );
 
                 impl_hoz_fns!(
-                    $ty,
-                    min: "Gets the smallest/minimum value of the vector",
-                    max: "Gets the biggest/maximum value of the vector",
-                    add as sum: "Sums up all the values inside the vector"
+                    3, $ty,
+                    min, "Gets the smallest/minimum value of the vector",
+                    max, "Gets the biggest/maximum value of the vector",
+                    sum, "Sums up all the values inside the vector"
                 );
 
                 impl_other_fns!(
-                    $ty,
-                    min as vmin: "smallest/minimum value",
-                    max as vmax: "biggest/maximum value"
-                );*/
+                    3,
+                    vmin, "smallest/minimum value",
+                    vmax, "biggest/maximum value"
+                );
             }
     
             impl From<$ty> for $name {
@@ -256,33 +355,32 @@ macro_rules! impl_composite {
                 /// Loads values from the pointer into the SIMD vector
                 #[inline(always)]
                 pub unsafe fn load (ptr: *const $ty) -> Self {
-                    let step = $lx + $ly;
                     Self (
                         <$x>::load(ptr),
                         <$y>::load(ptr.add($lx)),
-                        <$z>::load(ptr.add(step)),
-                        <$w>::load(ptr.add(step + $lz)),
+                        <$z>::load(ptr.add($lx + $ly)),
+                        <$w>::load(ptr.add($lx + $ly + $lz)),
                     )
                 }
 
-                /*impl_self_fns!(
-                    $ty,
+                impl_self_fns!(
+                    4, $ty,
                     abs: "absolute values",
                     sqrt: "square roots"
                 );
 
                 impl_hoz_fns!(
-                    $ty,
-                    min: "Gets the smallest/minimum value of the vector",
-                    max: "Gets the biggest/maximum value of the vector",
-                    add as sum: "Sums up all the values inside the vector"
+                    4, $ty,
+                    min, "Gets the smallest/minimum value of the vector",
+                    max, "Gets the biggest/maximum value of the vector",
+                    sum, "Sums up all the values inside the vector"
                 );
 
                 impl_other_fns!(
-                    $ty,
-                    min as vmin: "smallest/minimum value",
-                    max as vmax: "biggest/maximum value"
-                );*/
+                    4,
+                    vmin, "smallest/minimum value",
+                    vmax, "biggest/maximum value"
+                );
             }
     
             impl From<$ty> for $name {

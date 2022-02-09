@@ -21,6 +21,69 @@ macro_rules! _mm_concat {
     }
 }
 
+macro_rules! abs_mask {
+    (f32) => {
+        [i32::MAX;8]
+    };
+
+    (f64) => {
+        [i64::MAX;4]
+    };
+}
+
+macro_rules! impl_hoz_fns_straight {
+    (f32, $($fun:ident as $name:ident: $docs:expr),+) => {
+        $(
+            #[doc=$docs]
+            #[inline(always)]
+            pub fn $name (self) -> f32 {
+                unsafe {
+                    let vlow  = _mm256_castps256_ps128(self.0);
+                    let vhigh = _mm256_extractf128_ps(self.0, 1); // high 128
+                    let v = f32x4(concat_idents!(_mm_, $fun, _ps)(vlow, vhigh));
+                    return v.$name();
+                }
+            }
+        )*
+    };
+
+    (f64, $($fun:ident as $name:ident: $docs:expr),+) => {
+        $(
+            #[doc=$docs]
+            #[inline(always)]
+            pub fn $name (self) -> f64 {
+                unsafe {
+                    let shuf = _mm256_shuffle_pd(self.0, self.0, _MM_SHUFFLE(2, 3, 0, 1));
+                    let sums = _mm_concat!($fun, f64)(self.0, shuf);
+                    let shuff = _mm256_shuffle_pd(shuf, sums, _MM_SHUFFLE(0, 1, 4, 5));
+                    let sums = _mm_concat!($fun, f64)(sums, shuf);
+                    _mm256_cvtsd_f64(sums)
+                }
+            }
+        )*
+    };
+}
+
+macro_rules! impl_other_fns_straight {
+    ($ty:ident, $($fun:ident $(as $name:ident)?: $docs:expr),+) => {
+        $(
+            impl_other_fns_straight!(1, $fun $(,$name)?, $ty, $docs);
+        )*
+    };
+
+    (1, $fun:ident, $name:ident, $ty:ident, $docs:expr) => {
+        #[doc=concat!("Returns a vector with the ", $docs, " of each lane")]
+        #[inline(always)]
+        pub fn $name (self, rhs: Self) -> Self {
+            unsafe { Self(_mm_concat!($fun, $ty)(self.0, rhs.0)) }
+        }
+    };
+
+    (1, $fun:ident, $ty:ident, $docs:expr) => {
+        impl_other_fns!(1, $fun, $fun, $ty, $docs, $($tag)?)
+    };
+}
+
 macro_rules! impl_straight {
     (@arith $target:ident, $ty:ident, $($trait:ident, $fun:ident, $($tag:ident)?),+) => {
         $(
@@ -65,18 +128,18 @@ macro_rules! impl_straight {
             impl PartialEq for $target {
                 #[inline(always)]
                 fn eq (&self, rhs: &Self) -> bool {
-                    let cmp : u128 = unsafe { transmute(_mm_concat!(cmp, $ty)(self.0, rhs.0, _MM_CMPINT_EQ)) };
-                    cmp == u128::MAX
+                    let cmp : [u128;2] = unsafe { transmute(_mm_concat!(cmp, $ty)(self.0, rhs.0, _MM_CMPINT_EQ)) };
+                    cmp[0] == u128::MAX && cmp[1] == u128::MAX
                 }
             }
 
             impl $target {
-                const ABS_MASK : $og = unsafe { transmute(abs_mask!($ty, 128)) };
+                const ABS_MASK : $og = unsafe { transmute(abs_mask!($ty)) };
 
                 /// Loads values from the pointer into the SIMD vector
                 #[inline(always)]
                 pub unsafe fn load (ptr: *const $ty) -> Self {
-                    let reverse = arr![|i| *ptr.add($len - i); $len];
+                    let reverse = arr![|i| *ptr.add($len - 1 - i); $len];
                     Self(_mm_concat!(loadu, $ty)(addr_of!(reverse).cast()))
                 }
 
@@ -94,15 +157,15 @@ macro_rules! impl_straight {
 
                 impl_other_fns_straight!(
                     $ty,
-                    min as vmin $(with $tag)?: "smallest/minimum value",
-                    max as vmax $(with $tag)?: "biggest/maximum value"
+                    min as vmin: "smallest/minimum value",
+                    max as vmax: "biggest/maximum value"
                 );
 
                 impl_hoz_fns_straight!(
                     $ty,
-                    min $(with $tag)?: "Gets the smallest/minimum value of the vector",
-                    max $(with $tag)?: "Gets the biggest/maximum value of the vector",
-                    add as sum $(with $tag)?: "Sums up all the values inside the vector"
+                    min as min: "Gets the smallest/minimum value of the vector",
+                    max as max: "Gets the biggest/maximum value of the vector",
+                    add as sum: "Sums up all the values inside the vector"
                 );
             }
 
@@ -133,4 +196,19 @@ impl_composite!(
     (f32x8 => 8, f32x4 => 4) as f32x12: f32,
     (f32x8 => 8, f32x6 => 6) as f32x14: f32,
     (f32x8 => 8, f32x8 => 6) as f32x16: f32
+);
+
+impl_composite!(
+    (f64x4 => 4, f64x2 => 2) as f64x6: f64,
+    (f64x4 => 4, f64x4 => 4) as f64x8: f64
+);
+
+impl_composite!(
+    (f64x4 => 4, f64x4 => 4, f64x2 => 2) as f64x10: f64,
+    (f64x4 => 4, f64x4 => 4, f64x4 => 4) as f64x12: f64
+);
+
+impl_composite!(
+    (f64x4 => 4, f64x4 => 4, f64x4 => 4, f64x2 => 2) as f64x14: f64,
+    (f64x4 => 4, f64x4 => 4, f64x4 => 4, f64x4 => 4) as f64x16: f64
 );
