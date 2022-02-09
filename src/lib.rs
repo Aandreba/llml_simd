@@ -15,7 +15,7 @@ macro_rules! flat_mod {
 macro_rules! import {
     ($($i:ident),+) => {
         cfg_if::cfg_if! {
-            if #[cfg(target = "use_naive")] {
+            if #[cfg(target = "force_naive")] {
                 $(pub use crate::naive::$i;)*
             } else if #[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "sse"))] {
                 $(pub use crate::x86::$i;)*
@@ -46,7 +46,7 @@ macro_rules! impl_clone {
 include!("composite.rs");
 
 cfg_if! {
-    if #[cfg(target = "use_naive")] {
+    if #[cfg(target = "force_naive")] {
         mod naive;
     } else if #[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "sse"))] {
         mod x86;

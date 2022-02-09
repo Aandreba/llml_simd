@@ -139,8 +139,7 @@ macro_rules! impl_straight {
                 /// Loads values from the pointer into the SIMD vector
                 #[inline(always)]
                 pub unsafe fn load (ptr: *const $ty) -> Self {
-                    let reverse = arr![|i| *ptr.add($len - 1 - i); $len];
-                    Self(_mm_concat!(loadu, $ty)(addr_of!(reverse).cast()))
+                    Self(_mm_concat!(loadu, $ty)(ptr))
                 }
 
                 #[doc=concat!("Returns a vector with the absolute values of the original vector")]
@@ -180,13 +179,11 @@ macro_rules! impl_straight {
 }
 
 impl_straight!(
-    __m256 as f32x6 => [f32;6],
     __m256 as f32x8 => [f32;8],
     __m256d as f64x4 => [f64;4]
 );
 
 impl_clone!(
-    f32x6, f32, 6,
     f32x8, f32, 8,
     f64x4, f64, 4
 );

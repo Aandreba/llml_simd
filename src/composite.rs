@@ -230,7 +230,7 @@ macro_rules! impl_composite {
             #[derive(Clone, Copy, Assign, Neg, PartialEq)]
             #[assign_targets(Add, Sub, Mul, Div)]
             #[assign_rhs(Self, $ty)]
-            pub struct $name($x, $y);
+            pub struct $name(pub(crate) $x, pub(crate) $y);
     
             impl_composite!(
                 @arith2 $name, $ty,
@@ -285,7 +285,7 @@ macro_rules! impl_composite {
             #[derive(Clone, Copy, Assign, Neg, PartialEq)]
             #[assign_targets(Add, Sub, Mul, Div)]
             #[assign_rhs(Self, $ty)]
-            pub struct $name($x, $y, $z);
+            pub struct $name(pub(crate) $x, pub(crate) $y, pub(crate) $z);
     
             impl_composite!(
                 @arith3 $name, $ty,
@@ -341,7 +341,7 @@ macro_rules! impl_composite {
             #[derive(Clone, Copy, Assign, Neg, PartialEq)]
             #[assign_targets(Add, Sub, Mul, Div)]
             #[assign_rhs(Self, $ty)]
-            pub struct $name($x, $y, $z, $w);
+            pub struct $name(pub(crate) $x, pub(crate) $y, pub(crate) $z, pub(crate) $w);
     
             impl_composite!(
                 @arith4 $name, $ty,
