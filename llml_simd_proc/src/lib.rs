@@ -2,7 +2,7 @@ use std::any::Any;
 use std::borrow::Borrow;
 use std::ops::Deref;
 
-use proc_macro2::{Literal, TokenStream};
+use proc_macro2::{Literal, TokenStream, Span};
 use quote::__private::ext::RepToTokensExt;
 use quote::{quote, ToTokens};
 use syn::*;
@@ -184,4 +184,46 @@ fn replace_ident (expr: impl Into<Expr>, find: Ident, replace: Lit) -> Expr {
         Expr::Lit(lit) => Expr::Lit(lit),
         expr => panic!("Unidentified expression: {expr:?}")
     }
+}
+
+// GENERIC CONSTANTS
+struct ConstsInput {
+    pre: Ident,
+    len: Lit,
+    ty: Ident
+}
+
+impl Parse for ConstsInput {
+    fn parse(input: parse::ParseStream) -> Result<Self> {
+        let pre = input.parse::<Ident>()?;
+        input.parse::<Token![;]>()?;
+        let len = input.parse::<Lit>()?;
+        input.parse::<Token![as]>()?;
+
+        Ok(ConstsInput {
+            pre,
+            len,
+            ty: input.parse::<Ident>()?
+        })
+    }
+}
+
+
+#[proc_macro]
+pub fn consts (input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let input = parse_macro_input!(input as ConstsInput);
+
+    let ty = input.ty;
+    let len = match input.len {
+        Lit::Int(x) => x.base10_parse::<usize>().unwrap(),
+        _ => panic!("Only integers are valid as consts lengths")
+    };
+
+
+    let consts : Punctuated<proc_macro2::TokenStream, Comma> = (0..len).into_iter()
+        .map(|i| Ident::new(&format!("{:?}{i}", input.pre), Span::call_site()))
+        .map(|cst| quote! { const #cst: #ty })
+        .collect();
+
+    consts.to_token_stream().into()
 }

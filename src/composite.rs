@@ -227,6 +227,7 @@ macro_rules! impl_composite {
     ($(($x:ident => $lx:literal, $y:ident => $ly:literal) as $name:ident: $ty:ident),*) => {
         $(
             #[allow(non_camel_case_types)]
+            #[repr(C)]
             #[derive(Clone, Copy, Assign, Neg, PartialEq)]
             #[assign_targets(Add, Sub, Mul, Div)]
             #[assign_rhs(Self, $ty)]
@@ -332,13 +333,6 @@ macro_rules! impl_composite {
                     let array = [self.0.sum(), self.1.sum(), self.2.sum(), 0.];
                     <concat_idents!($ty, x4)>::from(array).sum()
                 }
-
-                /*impl_hoz_fns!(
-                    3, $ty,
-                    min, "Gets the smallest/minimum value of the vector",
-                    max, "Gets the biggest/maximum value of the vector",
-                    sum, "Sums up all the values inside the vector"
-                );*/
 
                 impl_other_fns!(
                     3,
