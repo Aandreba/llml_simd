@@ -4,28 +4,6 @@ use llml_simd::float::double::*;
 use core::ops::*;
 use rand::random;
 
-macro_rules! all_types {
-    () => {
-        [f32;2] as f32x2,
-        [f32;4] as f32x4,
-        [f32;6] as f32x6,
-        [f32;8] as f32x8,
-        [f32;10] as f32x10,
-        [f32;12] as f32x12,
-        [f32;14] as f32x14,
-        [f32;16] as f32x16,
-    
-        [f64;2] as f64x2,
-        [f64;4] as f64x4,
-        [f64;6] as f64x6,
-        [f64;8] as f64x8,
-        [f64;10] as f64x10,
-        [f64;12] as f64x12,
-        [f64;14] as f64x14,
-        [f64;16] as f64x16
-    };
-}
-
 macro_rules! test_other {
     ($($fun:ident $(as $name:ident)?),+) => {
         $(
@@ -224,40 +202,42 @@ macro_rules! test_from {
             let scalar : $ty = random();
             let vec : $target = scalar.into();
 
-            for i on 0..$len {
+            for i in 0..$len {
                 assert_eq!(vec[i], scalar);
             }
         )*
     }
 }
 
-macro_rules! test_various {
-    ($($name:ident),+) => {
+macro_rules! test_clone {
+    ($([$ty:ident;$len:literal] as $target:ident),+) => {
         $(
-            #[test]
-            pub fn $name () {
-                concat_idents!(test_, $name)(
-                    [f32;2] as f32x2,
-                    [f32;4] as f32x4,
-                    [f32;6] as f32x6,
-                    [f32;8] as f32x8,
-                    [f32;10] as f32x10,
-                    [f32;12] as f32x12,
-                    [f32;14] as f32x14,
-                    [f32;16] as f32x16,
-                
-                    [f64;2] as f64x2,
-                    [f64;4] as f64x4,
-                    [f64;6] as f64x6,
-                    [f64;8] as f64x8,
-                    [f64;10] as f64x10,
-                    [f64;12] as f64x12,
-                    [f64;14] as f64x14,
-                    [f64;16] as f64x16
-                );
-            }
+            let array : [$ty;$len] = random();
+            let alpha : $target = array.into();
+            let beta = alpha.clone();
+            assert_eq!(alpha, beta, stringify!($target));
         )*
-    };
+    }
+}
+
+macro_rules! test_eq {
+    ($([$ty:ident;$len:literal] as $target:ident),+) => {
+        $(
+            let first_array : [$ty;$len] = random();
+            let alpha : $target = first_array.into();
+            let beta = alpha.clone();
+
+            let mut last_array : [$ty;$len];
+            loop {
+                last_array = random();
+                if !last_array.iter().enumerate().all(|(i, x)| *x == first_array[i]) { break }
+            }
+            let gamma : $target = last_array.into();
+
+            assert_eq!(alpha, beta, stringify!($target));
+            assert_ne!(alpha, gamma);
+        )*
+    }
 }
 
 test_other!(
@@ -273,9 +253,51 @@ test_mappings!(
     neg, abs, sqrt
 );
 
-test_various!(
-    index
-);
+#[test]
+pub fn index () {
+    test_index!(
+        [f32;2] as f32x2,
+        [f32;4] as f32x4,
+        [f32;6] as f32x6,
+        [f32;8] as f32x8,
+        [f32;10] as f32x10,
+        [f32;12] as f32x12,
+        [f32;14] as f32x14,
+        [f32;16] as f32x16,
+    
+        [f64;2] as f64x2,
+        [f64;4] as f64x4,
+        [f64;6] as f64x6,
+        [f64;8] as f64x8,
+        [f64;10] as f64x10,
+        [f64;12] as f64x12,
+        [f64;14] as f64x14,
+        [f64;16] as f64x16
+    );
+}
+
+#[test]
+pub fn eq () {
+    test_eq!(
+        [f32;2] as f32x2,
+        [f32;4] as f32x4,
+        [f32;6] as f32x6,
+        [f32;8] as f32x8,
+        [f32;10] as f32x10,
+        [f32;12] as f32x12,
+        [f32;14] as f32x14,
+        [f32;16] as f32x16,
+    
+        [f64;2] as f64x2,
+        [f64;4] as f64x4,
+        [f64;6] as f64x6,
+        [f64;8] as f64x8,
+        [f64;10] as f64x10,
+        [f64;12] as f64x12,
+        [f64;14] as f64x14,
+        [f64;16] as f64x16
+    );
+}
 
 #[cfg(feature = "random")]
 #[test]
@@ -305,6 +327,75 @@ pub fn rnd () {
 #[test]
 pub fn serialize () {
     test_serde!(
+        [f32;2] as f32x2,
+        [f32;4] as f32x4,
+        [f32;6] as f32x6,
+        [f32;8] as f32x8,
+        [f32;10] as f32x10,
+        [f32;12] as f32x12,
+        [f32;14] as f32x14,
+        [f32;16] as f32x16,
+    
+        [f64;2] as f64x2,
+        [f64;4] as f64x4,
+        [f64;6] as f64x6,
+        [f64;8] as f64x8,
+        [f64;10] as f64x10,
+        [f64;12] as f64x12,
+        [f64;14] as f64x14,
+        [f64;16] as f64x16
+    );
+}
+
+#[test]
+pub fn clone () {
+    test_clone!(
+        [f32;2] as f32x2,
+        [f32;4] as f32x4,
+        [f32;6] as f32x6,
+        [f32;8] as f32x8,
+        [f32;10] as f32x10,
+        [f32;12] as f32x12,
+        [f32;14] as f32x14,
+        [f32;16] as f32x16,
+    
+        [f64;2] as f64x2,
+        [f64;4] as f64x4,
+        [f64;6] as f64x6,
+        [f64;8] as f64x8,
+        [f64;10] as f64x10,
+        [f64;12] as f64x12,
+        [f64;14] as f64x14,
+        [f64;16] as f64x16
+    );
+}
+
+#[test]
+pub fn into () {
+    test_into!(
+        [f32;2] as f32x2,
+        [f32;4] as f32x4,
+        [f32;6] as f32x6,
+        [f32;8] as f32x8,
+        [f32;10] as f32x10,
+        [f32;12] as f32x12,
+        [f32;14] as f32x14,
+        [f32;16] as f32x16,
+    
+        [f64;2] as f64x2,
+        [f64;4] as f64x4,
+        [f64;6] as f64x6,
+        [f64;8] as f64x8,
+        [f64;10] as f64x10,
+        [f64;12] as f64x12,
+        [f64;14] as f64x14,
+        [f64;16] as f64x16
+    );
+}
+
+#[test]
+pub fn from () {
+    test_from!(
         [f32;2] as f32x2,
         [f32;4] as f32x4,
         [f32;6] as f32x6,
