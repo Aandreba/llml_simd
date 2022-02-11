@@ -11,6 +11,15 @@ categories = ["embedded", "hardware-support", "mathematics", "no-std", "wasm"]
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[package.metadata.wasm-pack.profile.dev]
+wasm-opt = false
+
+[package.metadata.wasm-pack.profile.profiling]
+wasm-opt = false
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
+
 [dependencies]
 llml_simd = { path = "../" }
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }

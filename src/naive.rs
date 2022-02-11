@@ -98,6 +98,14 @@ macro_rules! impl_naive {
                 Div, div
             );
 
+            impl Neg for $target {
+                type Output = Self;
+
+                fn neg (self) -> Self::Output {
+                    Self(arr![|i| self[i].neg();$len])
+                }
+            }
+
             impl $target {
                 #[inline(always)]
                 pub fn new (a: [$ty;$len]) -> Self {
@@ -176,6 +184,18 @@ macro_rules! impl_naive {
                 #[inline(always)]
                 fn index_mut (&mut self, idx: usize) -> &mut $ty {
                     self.0.index_mut(idx)
+                }
+            }
+
+            impl PartialEq for $target {
+                #[inline]
+                fn eq (&self, other: &Self) -> bool {
+                    self.0.iter().enumerate().all(|(i, x)| *x == other[i])
+                }
+
+                #[inline]
+                fn ne (&self, other: &Self) -> bool {
+                    self.0.iter().enumerate().any(|(i, x)| *x != other[i])
                 }
             }
 

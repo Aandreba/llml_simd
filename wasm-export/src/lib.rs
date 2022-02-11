@@ -1,5 +1,6 @@
-use core::ops::*;
+use core::ops::{Add, Sub, Mul, Div, Neg, Index, IndexMut};
 use core::ptr::addr_of;
+use llml_simd::LlmlImpl;
 use wasm_bindgen::prelude::*;
 
 macro_rules! wasm_import {
@@ -79,12 +80,12 @@ macro_rules! wasm_export {
 
                 #[inline(always)]
                 pub fn eq (&self, other: &$target) -> bool {
-                    self.0.eq(&other.0)
+                    self.0 == other.0
                 }
 
                 #[inline(always)]
                 pub fn ne (&self, other: &$target) -> bool {
-                    self.0.ne(&other.0)
+                    self.0 != other.0
                 }
 
                 #[inline(always)]
@@ -151,6 +152,9 @@ wasm_export!(
 );
 
 #[wasm_bindgen(start)]
-pub fn main() {
+pub fn start() {
     console_error_panic_hook::set_once();
 }
+
+#[cfg(not(target_feature = "simd128"))]
+compile_error!("SIMD extension not found");

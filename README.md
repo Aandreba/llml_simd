@@ -1,6 +1,6 @@
-![Crates.io](https://img.shields.io/crates/v/llml_simd)
-![NPM](https://img.shields.io/npm/v/llml_simd)
-![Rust docs](https://img.shields.io/docsrs/llml_simd)
+[![Crates.io](https://img.shields.io/crates/v/llml_simd)](https://crates.io/crates/llml_simd)
+[![NPM](https://img.shields.io/npm/v/llml_simd)](https://www.npmjs.com/package/llml_simd)
+[![Rust docs](https://img.shields.io/docsrs/llml_simd)](https://docs.rs/llml_simd/0.1.2/llml_simd/)
 
 # LLML's SIMD
 SIMD (**S**ingle **I**nstruction **M**ultiple **D**ata) extension for a variety of targets.
@@ -50,7 +50,7 @@ pub fn main() {
 ```
 
 ### Dot product (JavaScript/TypeScript) ###
-```typescript
+```js
 import { f32x4 } from llml_simd
 
 let alpha = new f32x4(new Float32Array([1, 2, 3, 4]))
