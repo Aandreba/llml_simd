@@ -25,8 +25,7 @@ macro_rules! import {
             } else if #[cfg(all(target_arch = "wasm32", target_feature = "simd128"))] {
                 $(pub use crate::wasm::$i;)*
             } else {
-                $(pub use crate::wasm::$i;)*
-                //$(pub use crate::naive::$i;)*
+                $(pub use crate::naive::$i;)*
             }
         }
     };
