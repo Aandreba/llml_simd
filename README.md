@@ -1,5 +1,5 @@
-![NPM](https://img.shields.io/npm/v/llml_simd)
 ![Crates.io](https://img.shields.io/crates/v/llml_simd)
+![NPM](https://img.shields.io/npm/v/llml_simd)
 ![Rust docs](https://img.shields.io/docsrs/llml_simd)
 
 # LLML's SIMD
