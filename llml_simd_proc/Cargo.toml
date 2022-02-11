@@ -2,6 +2,9 @@
 name = "llml_simd_proc"
 version = "0.1.0"
 edition = "2021"
+description = "Procedural macros for llml_simd"
+keywords = ["simd", "sse", "webassembly", "wasm", "no_std"]
+categories = ["embedded", "hardware-support", "mathematics", "no-std", "wasm"]
 
 [lib]
 proc-macro = true
