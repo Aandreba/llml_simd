@@ -46,7 +46,7 @@ macro_rules! test_other {
                 Into::<[$ty;$len]>::into(simd)
                     .into_iter()
                     .zip(naive)
-                    .for_each(|(simd, naive)| assert!((simd - naive).abs() <= $ty::EPSILON, stringify!($fun)));
+                    .for_each(|(simd, naive)| assert!((simd - naive).abs() <= $ty::EPSILON * 2., stringify!($fun)));
             )*
         }
     };
@@ -95,7 +95,7 @@ macro_rules! test_mappings {
                 Into::<[$ty;$len]>::into(simd)
                     .into_iter()
                     .zip(naive)
-                    .for_each(|(simd, naive)| assert!((simd - naive).abs() <= $ty::EPSILON, stringify!($target)));
+                    .for_each(|(simd, naive)| assert!((simd - naive).abs() <= $ty::EPSILON * 2., stringify!($target)));
             )*
         }
     };
@@ -142,7 +142,9 @@ macro_rules! test_horiz {
                 let simd = alpha.$name();
 
                 let diff = (naive - simd).abs();
-                assert!(diff <= $ty::EPSILON * ($len as $ty), concat!("Comparison filed for '", stringify!($target), "'"));
+                if diff > ($ty::EPSILON + 1.) * ($len as $ty) {
+                    panic!("{0} error for '{1}': expected {simd}, got {naive}", stringify!($fun), stringify!($target));
+                }
             )*
         }
     };
@@ -179,8 +181,8 @@ macro_rules! test_serde {
         $(
             let test : $target = random::<[$ty;$len]>().into();
             let ser = serde_json::to_string(&test).unwrap();
-            let de = serde_json::from_str(&ser).unwrap();
-            assert_eq!(test, de);
+            let de : $target = serde_json::from_str(&ser).unwrap();
+            assert!((test - de).abs().sum() <= $ty::EPSILON * ($len as $ty));
         )*
     }
 }
