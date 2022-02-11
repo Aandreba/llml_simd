@@ -29,7 +29,7 @@ You can install it into your Node project with ```npm i llml_simd```
 ## Features ##
 | Feature           | Description                                                                                         |
 | ----------------- | --------------------------------------------------------------------------------------------------- |
-| ```force_naive``` | Forces naive types (see [Naive implementation](##Naive-implementation))                             |
+| ```force_naive``` | Forces naive types (see [Naive implementation](#Naive-implementation))                              |
 | ```use_avx```     | Enables the use of AVX SIMD types (see [AVX support](##AVX-Support))                                |
 | ```random```      | Enables random generation of vectors via [rand](https://github.com/rust-random/rand)                |
 | ```serialize```   | Enables serialization and deserialization of vectors via [serde](https://github.com/serde-rs/serde) |
