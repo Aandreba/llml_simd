@@ -2,12 +2,10 @@
 name = "llml_simd"
 version = "0.1.0"
 edition = "2021"
+description = "S"
 
 [features]
-default = ["standard"]
-standard = []
 force_naive = []
-wasm_dylib = []
 use_avx = []
 random = ["rand"]
 serialize = ["serde"]

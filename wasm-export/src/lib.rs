@@ -149,3 +149,8 @@ wasm_export!(
     [f64;14] as f64x14,
     [f64;16] as f64x16
 );
+
+#[wasm_bindgen(start)]
+pub fn main() {
+    console_error_panic_hook::set_once();
+}

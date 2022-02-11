@@ -1,10 +1,7 @@
 #![feature(concat_idents, exclusive_range_pattern)]
 #![cfg_attr(target_feature = "sse", feature(stdarch, stdsimd))]
 #![cfg_attr(target_arch = "wasm32", feature(simd_wasm64))]
-#![cfg_attr(not(feature = "standard"), no_std)]
-
-#[cfg(all(target_arch = "wasm32", feature = "wasm_dylib"))]
-use wasm_bindgen::prelude::*;
+#![no_std]
 
 use cfg_if::cfg_if;
 macro_rules! flat_mod {
@@ -38,14 +35,6 @@ macro_rules! import {
 macro_rules! impl_clone {
     ($($target:ident, $ty:ident, $len:literal),+) => {
         $(
-            #[cfg(all(target_arch = "wasm32", feature = "wasm_dylib"))]
-            #[wasm_bindgen]
-            impl $target {
-                pub fn clone (&self) -> $target {
-                    <Self as Clone>::clone(self)
-                }
-            }
-
             impl Clone for $target {
                 #[inline(always)]
                 fn clone(&self) -> Self {
@@ -71,9 +60,7 @@ cfg_if! {
         mod wasm;
         flat_mod!(generics);
     } else {
-        mod wasm;
-        flat_mod!(generics);
-        //mod naive;
+        mod naive;
     }
 }
 
@@ -148,10 +135,4 @@ pub const fn current_impl () -> LlmlImpl {
             LlmlImpl::NAIVE
         }
     }
-}
-
-#[cfg(all(target_arch = "wasm32", feature = "wasm_dylib"))]
-#[wasm_bindgen(start)]
-pub fn main() {
-    console_error_panic_hook::set_once();
 }
