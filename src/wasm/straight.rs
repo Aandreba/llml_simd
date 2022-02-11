@@ -33,11 +33,11 @@ macro_rules! f32x4_hoz {
         #[doc=$docs]
         #[inline(always)]
         pub fn $name (self) -> f32 {
-            let shuf = u32x4_shuffle::<2, 3, 0, 1>(self.0, self.0);
+            let shuf = u32x4_shuffle::<1, 0, 3, 2>(self.0, self.0);
             let sums = concat_idents!(f32x4_, $fun)(self.0, shuf);
             let shuf = u32x4_shuffle::<0, 1, 4, 5>(shuf, sums);
             let sums = concat_idents!(f32x4_, $fun)(sums, shuf);
-            f32x4_extract_lane::<0>(sums)
+            f32x4_extract_lane::<3>(sums)
         }
     };
 

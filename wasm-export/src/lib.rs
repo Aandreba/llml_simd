@@ -1,6 +1,7 @@
 use core::ops::{Add, Sub, Mul, Div, Neg, Index, IndexMut};
 use core::ptr::addr_of;
 use llml_simd::LlmlImpl;
+use rand::random;
 use wasm_bindgen::prelude::*;
 
 macro_rules! wasm_import {
@@ -9,7 +10,7 @@ macro_rules! wasm_import {
             #[wasm_bindgen]
             impl $target {
                 #[inline(always)]
-                pub fn $fun (self) -> Self {
+                pub fn $fun (&self) -> Self {
                     Self(self.0.$fun())
                 }
             }
@@ -21,7 +22,7 @@ macro_rules! wasm_import {
             #[wasm_bindgen]
             impl $target {
                 #[inline(always)]
-                pub fn $fun (self) -> $ty {
+                pub fn $fun (&self) -> $ty {
                     self.0.$fun()
                 }
             }
@@ -33,12 +34,37 @@ macro_rules! wasm_import {
             #[wasm_bindgen]
             impl $target {
                 #[inline(always)]
-                pub fn $fun (self, other: $target) -> $target {
+                pub fn $fun (&self, other: &$target) -> $target {
                     Self(self.0.$fun(other.0))
                 }
             }
         )*
     };
+}
+
+macro_rules! wasm_import_scal {
+    ($target:ident => $ty:ident) => {
+        wasm_import_scal!(
+            $target, $ty,
+            add as sadd, 
+            sub as ssub, 
+            mul as smul, 
+            div as sdiv
+        );
+    };
+
+    ($target:ident, $ty:ident, $($fun:ident as $name:ident),+) => {
+        $(
+            #[wasm_bindgen]
+            impl $target {
+                #[doc=concat!("Scalar ", stringify!($fun))]
+                #[inline(always)]
+                pub fn $name (&self, other: $ty) -> $target {
+                    Self(self.0.$fun(other))
+                }
+            }
+        )*
+    }
 }
 
 macro_rules! wasm_export {
@@ -69,6 +95,11 @@ macro_rules! wasm_export {
                 }
 
                 #[inline(always)]
+                pub fn random () -> $target {
+                    Self(random())
+                }
+
+                #[inline(always)]
                 pub fn get (&self, idx: usize) -> $ty {
                     unsafe { *(addr_of!(self.0) as *const $ty).add(idx) }
                 }
@@ -95,7 +126,7 @@ macro_rules! wasm_export {
 
                 #[allow(non_snake_case)]
                 #[inline(always)]
-                pub fn toArray(self) -> wasm_export!(@array $ty) {
+                pub fn toArray(&self) -> wasm_export!(@array $ty) {
                     let slice : &[$ty] = &Into::<[$ty;$len]>::into(self.0);
                     slice.into()
                 }
@@ -103,7 +134,7 @@ macro_rules! wasm_export {
                 #[allow(non_snake_case)]
                 #[inline(always)]
                 pub fn toString(&self) -> js_sys::JsString {
-                    dbg!("{self:?}").into()
+                    format!("{:?}", self.0).into()
                 }
             }
 
@@ -121,6 +152,8 @@ macro_rules! wasm_export {
                 @self $target,
                 neg, abs, sqrt
             );
+
+            wasm_import_scal!($target => $ty);
         )*
     };
 
