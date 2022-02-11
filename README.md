@@ -7,7 +7,7 @@ SIMD (**S**ingle **I**nstruction **M**ultiple **D**ata) extension for a variety 
 This project was initially started to facilitate the expansion of [LLML](https://github.com/Aandreba/llml)'s suported targets & features
 
 ## Contents ##
-This crate/library contains bindings to native-level SIMD instructions (alongside some polyfill) for SSE, AVX (see [AVX support](##AVX-Support)), NEON & WASM. It also contains naive implementations of all data-types (see [naive implementation](##Naive-implementation))
+This crate/library contains bindings to native-level SIMD instructions (alongside some polyfill) for SSE, AVX (see [AVX support](#AVX-Support)), NEON & WASM. It also contains naive implementations of all data-types (see [naive implementation](#Naive-implementation))
 
 ## No std ##
 ```llml_simd``` is a no_std crate. This means that it can be used for embeded systems projects seamlessly.
@@ -30,7 +30,7 @@ You can install it into your Node project with ```npm i llml_simd```
 | Feature           | Description                                                                                         |
 | ----------------- | --------------------------------------------------------------------------------------------------- |
 | ```force_naive``` | Forces naive types (see [Naive implementation](#Naive-implementation))                              |
-| ```use_avx```     | Enables the use of AVX SIMD types (see [AVX support](##AVX-Support))                                |
+| ```use_avx```     | Enables the use of AVX SIMD types (see [AVX support](#AVX-Support))                                |
 | ```random```      | Enables random generation of vectors via [rand](https://github.com/rust-random/rand)                |
 | ```serialize```   | Enables serialization and deserialization of vectors via [serde](https://github.com/serde-rs/serde) |
 

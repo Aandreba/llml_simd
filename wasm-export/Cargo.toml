@@ -2,6 +2,10 @@
 name = "wasm-export"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "WASM SIMD bindings"
+keywords = ["simd", "sse", "webassembly", "wasm", "no_std"]
+categories = ["embedded", "hardware-support", "mathematics", "no-std", "wasm"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
