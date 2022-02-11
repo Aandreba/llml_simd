@@ -1,6 +1,5 @@
 use serde::Deserialize;
 use serde::Serialize;
-use serde::de::Visitor;
 use serde::ser::SerializeSeq;
 use crate::float::single::*;
 use crate::float::double::*;

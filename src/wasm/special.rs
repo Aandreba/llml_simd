@@ -3,6 +3,7 @@ use core::mem::transmute;
 use core::ptr::addr_of;
 use llml_simd_proc::*;
 use core::arch::wasm::*;
+use wasm_bindgen::prelude::*;
 
 #[allow(non_camel_case_types)]
 #[repr(transparent)]

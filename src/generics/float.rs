@@ -13,9 +13,9 @@ macro_rules! impl_generic {
                     Self::from(a)
                 }
             
-                /// Creates a new vector with all lines filled with the provided value
+                /// Creates a new vector with all lanes filled with the provided value
                 #[inline(always)]
-                pub fn filled_with (a: $ty) -> Self {
+                pub fn filled_with (a: $ty) -> $target {
                     Self::from(a)
                 }
             }

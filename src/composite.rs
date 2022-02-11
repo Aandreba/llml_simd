@@ -283,6 +283,7 @@ macro_rules! impl_composite {
     ($(($x:ident => $lx:literal, $y:ident => $ly:literal, $z:ident => $lz:literal) as $name:ident: $ty:ident),*) => {
         $(
             #[allow(non_camel_case_types)]
+            #[repr(C)]
             #[derive(Clone, Copy, Assign, Neg, PartialEq)]
             #[assign_targets(Add, Sub, Mul, Div)]
             #[assign_rhs(Self, $ty)]
@@ -340,7 +341,7 @@ macro_rules! impl_composite {
                     vmax, "biggest/maximum value"
                 );
             }
-    
+
             impl From<$ty> for $name {
                 #[inline(always)]
                 fn from(x: $ty) -> Self {
@@ -353,6 +354,7 @@ macro_rules! impl_composite {
     ($(($x:ident => $lx:literal, $y:ident => $ly:literal, $z:ident => $lz:literal, $w:ident => $lw:literal) as $name:ident: $ty:ident),*) => {
         $(
             #[allow(non_camel_case_types)]
+            #[repr(C)]
             #[derive(Clone, Copy, Assign, Neg, PartialEq)]
             #[assign_targets(Add, Sub, Mul, Div)]
             #[assign_rhs(Self, $ty)]

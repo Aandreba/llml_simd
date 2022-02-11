@@ -119,7 +119,7 @@ macro_rules! impl_straight {
                 pub unsafe fn load (ptr: *const $ty) -> Self {
                     Self(v128_load(ptr.cast()))
                 }
-
+                
                 impl_self_fns_stright!(
                     $name, $ty,
                     abs: "absolute values",

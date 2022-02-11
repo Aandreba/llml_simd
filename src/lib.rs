@@ -1,7 +1,10 @@
 #![feature(concat_idents, exclusive_range_pattern)]
 #![cfg_attr(target_feature = "sse", feature(stdarch, stdsimd))]
 #![cfg_attr(target_arch = "wasm32", feature(simd_wasm64))]
-#![no_std]
+#![cfg_attr(not(feature = "standard"), no_std)]
+
+#[cfg(all(target_arch = "wasm32", feature = "wasm_dylib"))]
+use wasm_bindgen::prelude::*;
 
 use cfg_if::cfg_if;
 macro_rules! flat_mod {
@@ -35,6 +38,14 @@ macro_rules! import {
 macro_rules! impl_clone {
     ($($target:ident, $ty:ident, $len:literal),+) => {
         $(
+            #[cfg(all(target_arch = "wasm32", feature = "wasm_dylib"))]
+            #[wasm_bindgen]
+            impl $target {
+                pub fn clone (&self) -> $target {
+                    <Self as Clone>::clone(self)
+                }
+            }
+
             impl Clone for $target {
                 #[inline(always)]
                 fn clone(&self) -> Self {
@@ -126,7 +137,7 @@ pub const fn current_impl () -> LlmlImpl {
             LlmlImpl::NAIVE
         } else if #[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "sse"))] {
             #[cfg(all(feature = "use_avx", target_feature = "avx"))]
-            LlmlImpl::AVX
+            return LlmlImpl::AVX;
             #[cfg(not(all(feature = "use_avx", target_feature = "avx")))]
             LlmlImpl::SSE
         } else if #[cfg(all(any(target_arch = "arm", target_arch = "aarch64"), target_feature = "neon"))] {
@@ -137,4 +148,10 @@ pub const fn current_impl () -> LlmlImpl {
             LlmlImpl::NAIVE
         }
     }
+}
+
+#[cfg(all(target_arch = "wasm32", feature = "wasm_dylib"))]
+#[wasm_bindgen(start)]
+pub fn main() {
+    console_error_panic_hook::set_once();
 }
