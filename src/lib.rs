@@ -1,7 +1,7 @@
 #![feature(concat_idents, exclusive_range_pattern)]
 #![cfg_attr(target_feature = "sse", feature(stdarch, stdsimd))]
 #![cfg_attr(target_arch = "wasm32", feature(simd_wasm64))]
-#![no_std]
+#![cfg_attr(not(feature = "use_std"), no_std)]
 
 use cfg_if::cfg_if;
 macro_rules! flat_mod {

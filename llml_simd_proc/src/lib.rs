@@ -179,7 +179,28 @@ fn replace_ident (expr: impl Into<Expr>, find: Ident, replace: Lit) -> Expr {
         Expr::Group(mut group) => {
             group.expr = Box::new(replace_ident(*group.expr, find.clone(), replace.clone()));
             Expr::Group(group)
-        }
+        },
+
+        Expr::Paren(mut paren) => {
+            paren.expr = Box::new(replace_ident(*paren.expr, find.clone(), replace.clone()));
+            Expr::Paren(paren)
+        },
+
+        Expr::Cast(mut cast) => {
+            cast.expr = Box::new(replace_ident(*cast.expr, find.clone(), replace.clone()));
+            Expr::Cast(cast)
+        },
+
+        Expr::Index(mut idx) => {
+            idx.expr = Box::new(replace_ident(*idx.expr, find.clone(), replace.clone()));
+            idx.index = Box::new(replace_ident(*idx.index, find.clone(), replace.clone()));
+            Expr::Index(idx)
+        },
+
+        Expr::Field(mut field) => {
+            field.base = Box::new(replace_ident(*field.base, find.clone(), replace.clone()));
+            Expr::Field(field)
+        },
 
         Expr::Lit(lit) => Expr::Lit(lit),
         expr => panic!("Unidentified expression: {expr:?}")

@@ -196,6 +196,41 @@ macro_rules! impl_naive {
     };
 }
 
+cfg_if::cfg_if! {
+    if #[cfg(not(feature = "use_std"))] {
+        use core::mem::transmute;
+
+        trait FloatExt {
+            fn abs(self) -> Self;
+            fn sqrt(self) -> Self;
+        }
+        
+        impl FloatExt for f32 {
+            #[inline(always)]
+            fn abs (self) -> f32 {
+                unsafe { transmute::<i32,f32>(transmute::<f32,i32>(self) & i32::MAX) }
+            }
+        
+            #[inline(always)]
+            fn sqrt (self) -> f32 {
+                todo!()
+            }
+        }
+
+        impl FloatExt for f64 {
+            #[inline(always)]
+            fn abs (self) -> f64 {
+                unsafe { transmute::<i64,f64>(transmute::<f64,i64>(self) & i64::MAX) }
+            }
+        
+            #[inline(always)]
+            fn sqrt (self) -> f64 {
+                todo!()
+            }
+        }
+    }
+}
+
 impl_naive!(
     [f32;2] as f32x2,
     [f32;4] as f32x4,

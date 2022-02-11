@@ -1,6 +1,6 @@
 [package]
 name = "llml_simd"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/Aandreba/llml_simd"
@@ -9,6 +9,7 @@ keywords = ["simd", "sse", "webassembly", "wasm", "no_std"]
 categories = ["embedded", "hardware-support", "mathematics", "no-std", "wasm"]
 
 [features]
+use_std = []
 force_naive = []
 use_avx = []
 random = ["rand"]
