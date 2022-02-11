@@ -3,6 +3,7 @@ name = "wasm-export"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
+repository = "https://github.com/Aandreba/llml_simd"
 description = "WASM SIMD bindings"
 keywords = ["simd", "sse", "webassembly", "wasm", "no_std"]
 categories = ["embedded", "hardware-support", "mathematics", "no-std", "wasm"]

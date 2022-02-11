@@ -10,6 +10,9 @@ publish:
 	cargo test --all --all-features
 	cd llml_simd_proc && cargo test --all --all-features
 	cd llml_simd_proc && cargo publish
+	make publish-straight
+
+publish-straight:
 	cargo publish
 	cd wasm-export && wasm-pack built --target nodejs --out-dir ${WASM}
 	cp README.md ${WASM}/README.md

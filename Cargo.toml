@@ -3,6 +3,7 @@ name = "llml_simd"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
+repository = "https://github.com/Aandreba/llml_simd"
 description = "SIMD (Single Instruction Multiple Data) extension for a variety of targets"
 keywords = ["simd", "sse", "webassembly", "wasm", "no_std"]
 categories = ["embedded", "hardware-support", "mathematics", "no-std", "wasm"]
