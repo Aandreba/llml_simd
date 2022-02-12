@@ -9,6 +9,7 @@ keywords = ["simd", "sse", "webassembly", "wasm", "no_std"]
 categories = ["embedded", "hardware-support", "mathematics", "no-std", "wasm"]
 
 [features]
+default = ["use_std"]
 use_std = []
 force_naive = []
 use_avx = []
