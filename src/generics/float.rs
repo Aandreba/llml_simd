@@ -4,6 +4,19 @@ use crate::float::double::*;
 use core::ptr::addr_of;
 use core::ops::*;
 
+macro_rules! impl_clone {
+    ($($target:ident, $ty:ident, $len:literal),+) => {
+        $(
+            impl Clone for $target {
+                #[inline(always)]
+                fn clone(&self) -> Self {
+                    unsafe { Self::load(self as *const Self as *const $ty) }
+                }
+            }
+        )*
+    };
+}
+
 macro_rules! impl_generic {
     ($($target:ident, $ty:ident, $len:literal),+) => {
         $(

@@ -1,7 +1,6 @@
 #![feature(concat_idents)]
 use llml_simd::float::single::*;
 use llml_simd::float::double::*;
-use llml_simd_proc::arr;
 use core::ops::*;
 use rand::random;
 
@@ -266,22 +265,6 @@ macro_rules! test_transpose {
     }
 }
 
-macro_rules! test_split {
-    ($([$ty:ident;$len:literal] as $target:ident),+) => {
-        $(
-            let alpha_array : [$ty;$len] = random();
-            let alpha : $target = alpha_array.into();
-
-            let split_a = alpha.split_high();
-            let split_b = alpha.split_low();
-
-            assert_eq!(alpha.split(), (split_a, split_b));
-            assert_eq!(split_a.into(), &alpha_array[..($len/2)]);
-            assert_eq!(split_b.into(), &alpha_array[($len/2)..]);
-        )*
-    }
-}
-
 test_other!(
     add, sub, mul, div, 
     min as vmin, max as vmax
@@ -294,30 +277,6 @@ test_horiz!(
 test_mappings!(
     neg, abs, sqrt
 );
-
-#[test]
-pub fn shuffle () {
-    test_index!(
-        [f32;2] as f32x2,
-        [f32;3] as f32x3,
-        [f32;4] as f32x4,
-        [f32;6] as f32x6,
-        [f32;8] as f32x8,
-        [f32;10] as f32x10,
-        [f32;12] as f32x12,
-        [f32;14] as f32x14,
-        [f32;16] as f32x16,
-    
-        [f64;2] as f64x2,
-        [f64;4] as f64x4,
-        [f64;6] as f64x6,
-        [f64;8] as f64x8,
-        [f64;10] as f64x10,
-        [f64;12] as f64x12,
-        [f64;14] as f64x14,
-        [f64;16] as f64x16
-    );
-}
 
 #[test]
 pub fn index () {
@@ -333,6 +292,7 @@ pub fn index () {
         [f32;16] as f32x16,
     
         [f64;2] as f64x2,
+        [f64;3] as f64x3,
         [f64;4] as f64x4,
         [f64;6] as f64x6,
         [f64;8] as f64x8,
@@ -357,6 +317,7 @@ pub fn eq () {
         [f32;16] as f32x16,
     
         [f64;2] as f64x2,
+        [f64;3] as f64x3,
         [f64;4] as f64x4,
         [f64;6] as f64x6,
         [f64;8] as f64x8,
@@ -382,6 +343,7 @@ pub fn rnd () {
         [f32;16] as f32x16,
     
         [f64;2] as f64x2,
+        [f64;3] as f64x3,
         [f64;4] as f64x4,
         [f64;6] as f64x6,
         [f64;8] as f64x8,
@@ -407,6 +369,7 @@ pub fn serialize () {
         [f32;16] as f32x16,
     
         [f64;2] as f64x2,
+        [f64;3] as f64x3,
         [f64;4] as f64x4,
         [f64;6] as f64x6,
         [f64;8] as f64x8,
@@ -431,6 +394,7 @@ pub fn clone () {
         [f32;16] as f32x16,
     
         [f64;2] as f64x2,
+        [f64;3] as f64x3,
         [f64;4] as f64x4,
         [f64;6] as f64x6,
         [f64;8] as f64x8,
@@ -455,6 +419,7 @@ pub fn into () {
         [f32;16] as f32x16,
     
         [f64;2] as f64x2,
+        [f64;3] as f64x3,
         [f64;4] as f64x4,
         [f64;6] as f64x6,
         [f64;8] as f64x8,
@@ -479,6 +444,7 @@ pub fn from () {
         [f32;16] as f32x16,
     
         [f64;2] as f64x2,
+        [f64;3] as f64x3,
         [f64;4] as f64x4,
         [f64;6] as f64x6,
         [f64;8] as f64x8,
@@ -510,31 +476,26 @@ pub fn transp () {
         [f64;14] as f64x14,
         [f64;16] as f64x16
     );
-}
 
-/*
-#[test]
-pub fn split () {
-    test_split!(
-        [f32;2] as f32x2,
-        [f32;4] as f32x4,
-        [f32;6] as f32x6,
-        [f32;8] as f32x8,
-        [f32;10] as f32x10,
-        [f32;12] as f32x12,
-        [f32;14] as f32x14,
-        [f32;16] as f32x16,
-    
-        [f64;2] as f64x2,
-        [f64;4] as f64x4,
-        [f64;6] as f64x6,
-        [f64;8] as f64x8,
-        [f64;10] as f64x10,
-        [f64;12] as f64x12,
-        [f64;14] as f64x14,
-        [f64;16] as f64x16
-    );
+    // f32x3
+    let alpha_array : [f32;3] = random();
+    let alpha : f32x3 = alpha_array.into();
+
+    let beta_array : [f32;3] = random();
+    let beta : f32x3 = beta_array.into();
+
+    let result = [alpha[0], beta[0], alpha[1]];
+    assert_eq!(Into::<[f32;3]>::into(alpha.zip(beta)), result);
+
+    // f64x3
+    let alpha_array : [f64;3] = random();
+    let alpha : f64x3 = alpha_array.into();
+
+    let beta_array : [f64;3] = random();
+    let beta : f64x3 = beta_array.into();
+
+    let result = [alpha[0], beta[0], alpha[1]];
+    assert_eq!(Into::<[f64;3]>::into(alpha.zip(beta)), result);
 }
-*/
 
 // vtrn1q_f32

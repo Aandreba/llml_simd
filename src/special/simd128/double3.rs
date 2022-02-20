@@ -1,5 +1,7 @@
-ops_use!();
+#[cfg(not(feature = "use_std"))]
+use crate::special::NoStdMath;
 use core::ops::*;
+use std::ptr::addr_of;
 use llml_simd_proc::*;
 use crate::float::double::f64x2;
 
@@ -57,6 +59,16 @@ impl f64x3 {
     #[inline(always)]
     pub fn vmax (self, rhs: Self) -> Self {
         Self(self.0.vmax(rhs.0), self.1.max(rhs.1))
+    }
+
+    /// Interleaves elements of both vectors into one
+    #[inline(always)]
+    pub fn zip (self, rhs: Self) -> Self {
+        unsafe { 
+            let alpha = addr_of!(self) as *const f64;
+            let beta = addr_of!(rhs) as *const f64;
+            Self::new([*alpha, *beta, *alpha.add(1)])
+        }
     }
 }
 

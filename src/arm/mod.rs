@@ -10,4 +10,6 @@ macro_rules! arch_use {
     };
 }
 
+// Select: vbsl_f32
 flat_mod!(straight, composite);
+flat_mod!(float3);

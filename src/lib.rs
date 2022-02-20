@@ -3,7 +3,6 @@
 #![cfg_attr(target_arch = "wasm32", feature(simd_wasm64))]
 #![cfg_attr(not(feature = "use_std"), no_std)]
 
-use cfg_if::cfg_if;
 macro_rules! flat_mod {
     ($($i:ident),+) => {
         $(
@@ -31,23 +30,11 @@ macro_rules! import {
     };
 }
 
-macro_rules! impl_clone {
-    ($($target:ident, $ty:ident, $len:literal),+) => {
-        $(
-            impl Clone for $target {
-                #[inline(always)]
-                fn clone(&self) -> Self {
-                    unsafe { Self::load(self as *const Self as *const $ty) }
-                }
-            }
-        )*
-    };
-}
-
 include!("composite.rs");
+mod special;
 
-cfg_if! {
-    if #[cfg(target = "force_naive")] {
+cfg_if::cfg_if! {
+    if #[cfg(feature = "force_naive")] {
         mod naive;
     } else if #[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "sse"))] {
         mod x86;
@@ -67,12 +54,20 @@ cfg_if! {
 pub mod float {
     /// Single-precision floating point vectors
     pub mod single {
-        import!(f32x2, f32x4, f32x6, f32x8, f32x10, f32x12, f32x14, f32x16);
+        import!(f32x2, f32x3, f32x4, f32x6, f32x8, f32x10, f32x12, f32x14, f32x16);
     }
 
     /// Double-precision floating point vectors
     pub mod double {
         import!(f64x2, f64x4, f64x6, f64x8, f64x10, f64x12, f64x14, f64x16);
+
+        cfg_if::cfg_if! {
+            if #[cfg(all(feature = "use_avx", target_feature = "avx"))] {
+                import!(f64x3);
+            } else {
+                pub use crate::special::f64x3;
+            }
+        }
     }
 }
 
@@ -81,7 +76,7 @@ pub enum LlmlImpl {
     /// x86/x86_64 SSE (128-bit) implementation
     SSE,
 
-    /// x86/x86_64 AVX (256-bit) implementation
+    /// x86/x86_64 AVX (128-bit to 256-bit) implementation
     AVX,
 
     /// arm/aarch64 NEON (64-bit to 128-bit) implementation
@@ -118,8 +113,8 @@ impl LlmlImpl {
 
 #[inline]
 pub const fn current_impl () -> LlmlImpl {
-    cfg_if! {
-        if #[cfg(target = "force_naive")] {
+    cfg_if::cfg_if! {
+        if #[cfg(feature = "force_naive")] {
             LlmlImpl::NAIVE
         } else if #[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "sse"))] {
             #[cfg(all(feature = "use_avx", target_feature = "avx"))]

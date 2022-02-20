@@ -116,7 +116,7 @@ macro_rules! impl_straight {
             #[derive(Copy, Assign)]
             #[assign_targets(Add, Sub, Mul, Div)]
             #[assign_rhs(Self, $ty)]
-            pub struct $name($og);
+            pub struct $name(pub(crate) $og);
 
             impl_arith!(
                 $name, $ty,
