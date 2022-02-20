@@ -99,20 +99,20 @@ impl LlmlImpl {
 
     #[inline]
     pub const fn is_64bit (&self) -> bool {
-        matches!(self, NEON)
+        matches!(self, LlmlImpl::NEON)
     }
 
     #[inline]
     pub const fn is_128bit (&self) -> bool {
         match self {
-            NAIVE => false,
+            LlmlImpl::NAIVE => false,
             _ => true
         }
     }
 
     #[inline]
     pub const fn is_256bit (&self) -> bool {
-        matches!(self, AVX)
+        matches!(self, LlmlImpl::AVX)
     }
 }
 

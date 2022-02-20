@@ -1,5 +1,6 @@
 use derive_more::*;
 use core::ops::*;
+use core::ptr::addr_of;
 use llml_simd_proc::{Assign, assign_targets, assign_rhs};
 use super::*;
 

@@ -269,6 +269,22 @@ macro_rules! impl_composite {
                     vmin, "smallest/minimum value",
                     vmax, "biggest/maximum value"
                 );
+
+                /// Interleaves elements of both vectors into one
+                #[inline(always)]
+                pub fn zip (self, rhs: Self) -> Self {
+                    const D1 : usize = $lx/2;
+
+                    let first = self.0.zip(rhs.0);
+                    let last;
+                    unsafe {
+                        let alpha = *((addr_of!(self) as *const $ty).add(D1) as *const $y);
+                        let beta = *((addr_of!(rhs) as *const $ty).add(D1) as *const $y);
+                        last = alpha.zip(beta);
+                    }
+
+                    Self(first, last)
+                }
             }
     
             impl From<$ty> for $name {
@@ -340,6 +356,28 @@ macro_rules! impl_composite {
                     vmin, "smallest/minimum value",
                     vmax, "biggest/maximum value"
                 );
+
+                /// Interleaves elements of both vectors into one
+                #[inline(always)]
+                pub fn zip (self, rhs: Self) -> Self {
+                    const D1 : usize = $lx/2;
+                    const D2 : usize = D1 + $ly/2;
+
+                    let first = self.0.zip(rhs.0);
+                    let second;
+                    let last;
+                    unsafe {
+                        let alpha = *((addr_of!(self) as *const $ty).add(D1) as *const $y);
+                        let beta = *((addr_of!(rhs) as *const $ty).add(D1) as *const $y);
+                        second = alpha.zip(beta);
+
+                        let alpha = *((addr_of!(self) as *const $ty).add(D2) as *const $z);
+                        let beta = *((addr_of!(rhs) as *const $ty).add(D2) as *const $z);
+                        last = alpha.zip(beta);
+                    }
+
+                    Self(first, second, last)
+                }
             }
 
             impl From<$ty> for $name {
@@ -398,6 +436,34 @@ macro_rules! impl_composite {
                     vmin, "smallest/minimum value",
                     vmax, "biggest/maximum value"
                 );
+
+                /// Interleaves elements of both vectors into one
+                #[inline(always)]
+                pub fn zip (self, rhs: Self) -> Self {
+                    const D1 : usize = $lx/2;
+                    const D2 : usize = D1 + $ly/2;
+                    const D3 : usize = D2 + $lz/2;
+
+                    let first = self.0.zip(rhs.0);
+                    let second;
+                    let third;
+                    let last;
+                    unsafe {
+                        let alpha = *((addr_of!(self) as *const $ty).add(D1) as *const $y);
+                        let beta = *((addr_of!(rhs) as *const $ty).add(D1) as *const $y);
+                        second = alpha.zip(beta);
+
+                        let alpha = *((addr_of!(self) as *const $ty).add(D2) as *const $z);
+                        let beta = *((addr_of!(rhs) as *const $ty).add(D2) as *const $z);
+                        third = alpha.zip(beta);
+
+                        let alpha = *((addr_of!(self) as *const $ty).add(D3) as *const $w);
+                        let beta = *((addr_of!(rhs) as *const $ty).add(D3) as *const $w);
+                        last = alpha.zip(beta);
+                    }
+
+                    Self(first, second, third, last)
+                }
             }
     
             impl From<$ty> for $name {

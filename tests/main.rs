@@ -1,6 +1,7 @@
 #![feature(concat_idents)]
 use llml_simd::float::single::*;
 use llml_simd::float::double::*;
+use llml_simd_proc::arr;
 use core::ops::*;
 use rand::random;
 
@@ -242,7 +243,7 @@ macro_rules! test_eq {
     }
 }
 
-macro_rules! test_shuffle {
+macro_rules! test_transpose {
     ($([$ty:ident;$len:literal] as $target:ident),+) => {
         $(
             let alpha_array : [$ty;$len] = random();
@@ -251,7 +252,29 @@ macro_rules! test_shuffle {
             let beta_array : [$ty;$len] = random();
             let beta : $target = beta_array.into();
 
-            assert_eq!(alpha.shuffle(beta, ))
+            let mut result = [(0 as $ty);$len];
+            for i in 0..($len/2) {
+                result[2 * i] = alpha[i];
+                result[2 * i + 1] = beta[i];
+            }
+
+            assert_eq!(Into::<[$ty;$len]>::into(alpha.zip(beta)), result);
+        )*
+    }
+}
+
+macro_rules! test_split {
+    ($([$ty:ident;$len:literal] as $target:ident),+) => {
+        $(
+            let alpha_array : [$ty;$len] = random();
+            let alpha : $target = alpha_array.into();
+
+            let split_a = alpha.split_high();
+            let split_b = alpha.split_low();
+
+            assert_eq!(alpha.split(), (split_a, split_b));
+            assert_eq!(split_a.into(), &alpha_array[..($len/2)]);
+            assert_eq!(split_b.into(), &alpha_array[($len/2)..]);
         )*
     }
 }
@@ -454,3 +477,53 @@ pub fn from () {
         [f64;16] as f64x16
     );
 }
+
+#[test]
+pub fn transp () {
+    test_transpose!(
+        [f32;2] as f32x2,
+        [f32;4] as f32x4,
+        [f32;6] as f32x6,
+        [f32;8] as f32x8,
+        [f32;10] as f32x10,
+        [f32;12] as f32x12,
+        [f32;14] as f32x14,
+        [f32;16] as f32x16,
+    
+        [f64;2] as f64x2,
+        [f64;4] as f64x4,
+        [f64;6] as f64x6,
+        [f64;8] as f64x8,
+        [f64;10] as f64x10,
+        [f64;12] as f64x12,
+        [f64;14] as f64x14,
+        [f64;16] as f64x16
+    );
+}
+
+/*
+#[test]
+pub fn split () {
+    test_split!(
+        [f32;2] as f32x2,
+        [f32;4] as f32x4,
+        [f32;6] as f32x6,
+        [f32;8] as f32x8,
+        [f32;10] as f32x10,
+        [f32;12] as f32x12,
+        [f32;14] as f32x14,
+        [f32;16] as f32x16,
+    
+        [f64;2] as f64x2,
+        [f64;4] as f64x4,
+        [f64;6] as f64x6,
+        [f64;8] as f64x8,
+        [f64;10] as f64x10,
+        [f64;12] as f64x12,
+        [f64;14] as f64x14,
+        [f64;16] as f64x16
+    );
+}
+*/
+
+// vtrn1q_f32

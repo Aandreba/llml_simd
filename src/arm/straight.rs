@@ -162,6 +162,12 @@ macro_rules! impl_straight {
                     min as vmin $(with $tag)?: "smallest/minimum value",
                     max as vmax $(with $tag)?: "biggest/maximum value"
                 );
+
+                /// Interleaves elements of both vectors into one
+                #[inline(always)]
+                pub fn zip (self, rhs: Self) -> Self {
+                    unsafe { Self(concat_idents!(vzip1, $($tag,)? _, $ty)(self.0, rhs.0)) }
+                }
             }
 
             impl From<$ty> for $name {

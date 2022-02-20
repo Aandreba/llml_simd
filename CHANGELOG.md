@@ -4,3 +4,6 @@ v0.1.3
 - Added random to WASM export
 - Vector-Scalar arithmetic for WASM export
 - Memory Sharing (a.k.a data copy) for WASM export
+
+v0.1.4
+- Added ```zip``` and ```split``` methods
