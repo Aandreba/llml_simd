@@ -3,6 +3,7 @@
 #![cfg_attr(target_arch = "wasm32", feature(simd_wasm64))]
 #![cfg_attr(not(feature = "use_std"), no_std)]
 
+use cfg_if::cfg_if;
 macro_rules! flat_mod {
     ($($i:ident),+) => {
         $(
@@ -12,18 +13,10 @@ macro_rules! flat_mod {
     };
 }
 
-macro_rules! ops_use {
-    () => {
-        use core::ops::*;
-        #[cfg(not(feature = "use_std"))]
-        use crate::special::floatext;
-    };
-}
-
 macro_rules! import {
     ($($i:ident),+) => {
         cfg_if::cfg_if! {
-            if #[cfg(feature = "force_naive")] {
+            if #[cfg(target = "force_naive")] {
                 $(pub use crate::naive::$i;)*
             } else if #[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "sse"))] {
                 $(pub use crate::x86::$i;)*
@@ -53,8 +46,8 @@ macro_rules! impl_clone {
 
 include!("composite.rs");
 
-cfg_if::cfg_if! {
-    if #[cfg(feature = "force_naive")] {
+cfg_if! {
+    if #[cfg(target = "force_naive")] {
         mod naive;
     } else if #[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "sse"))] {
         mod x86;
@@ -70,26 +63,16 @@ cfg_if::cfg_if! {
     }
 }
 
-mod special;
-
 /// Floating-point vectors
 pub mod float {
     /// Single-precision floating point vectors
     pub mod single {
-        import!(f32x2, f32x3, f32x4, f32x6, f32x8, f32x10, f32x12, f32x14, f32x16);
+        import!(f32x2, f32x4, f32x6, f32x8, f32x10, f32x12, f32x14, f32x16);
     }
 
     /// Double-precision floating point vectors
     pub mod double {
         import!(f64x2, f64x4, f64x6, f64x8, f64x10, f64x12, f64x14, f64x16);
-        
-        cfg_if::cfg_if! {
-            if #[cfg(all(feature = "use_avx", target_feature = "avx"))] {
-                import!(f64x3);
-            } else {
-                pub use crate::special::f64x3;
-            }
-        }
     }
 }
 
@@ -116,45 +99,33 @@ impl LlmlImpl {
 
     #[inline]
     pub const fn is_64bit (&self) -> bool {
-<<<<<<< HEAD
         matches!(self, LlmlImpl::NEON)
-=======
-        matches!(self, Self::NEON)
->>>>>>> 51bdbc799237b5757d35a5007c08b1dd48508e16
     }
 
     #[inline]
     pub const fn is_128bit (&self) -> bool {
         match self {
-<<<<<<< HEAD
             LlmlImpl::NAIVE => false,
-=======
-            Self::NAIVE => false,
->>>>>>> 51bdbc799237b5757d35a5007c08b1dd48508e16
             _ => true
         }
     }
 
     #[inline]
     pub const fn is_256bit (&self) -> bool {
-<<<<<<< HEAD
         matches!(self, LlmlImpl::AVX)
-=======
-        matches!(self, Self::AVX)
->>>>>>> 51bdbc799237b5757d35a5007c08b1dd48508e16
     }
 }
 
 #[inline]
 pub const fn current_impl () -> LlmlImpl {
-    cfg_if::cfg_if! {
-        if #[cfg(feature = "force_naive")] {
+    cfg_if! {
+        if #[cfg(target = "force_naive")] {
             LlmlImpl::NAIVE
         } else if #[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "sse"))] {
             #[cfg(all(feature = "use_avx", target_feature = "avx"))]
             return LlmlImpl::AVX;
             #[cfg(not(all(feature = "use_avx", target_feature = "avx")))]
-            return LlmlImpl::SSE;
+            LlmlImpl::SSE
         } else if #[cfg(all(any(target_arch = "arm", target_arch = "aarch64"), target_feature = "neon"))] {
             LlmlImpl::NEON
         } else if #[cfg(all(target_arch = "wasm32", target_feature = "simd128"))] {
