@@ -1,9 +1,8 @@
-use core::ops::*;
 use core::mem::transmute;
-use core::ptr::addr_of;
 use llml_simd_proc::*;
 use derive_more::*;
 use crate::x86::special::*;
+use core::ops::*;
 arch_use!();
 
 macro_rules! _mm_concat {

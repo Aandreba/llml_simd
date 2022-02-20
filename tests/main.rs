@@ -10,6 +10,7 @@ macro_rules! test_other {
         $(
             test_other!($fun, $($name,)?
                 [f32;2] as f32x2,
+                [f32;3] as f32x3,
                 [f32;4] as f32x4,
                 [f32;6] as f32x6,
                 [f32;8] as f32x8,
@@ -62,6 +63,7 @@ macro_rules! test_mappings {
         $(
             test_mappings!($fun, $($name,)?
                 [f32;2] as f32x2,
+                [f32;3] as f32x3,
                 [f32;4] as f32x4,
                 [f32;6] as f32x6,
                 [f32;8] as f32x8,
@@ -111,6 +113,7 @@ macro_rules! test_horiz {
         $(
             test_horiz!($fun, $($name,)?
                 [f32;2] as f32x2,
+                [f32;3] as f32x3,
                 [f32;4] as f32x4,
                 [f32;6] as f32x6,
                 [f32;8] as f32x8,
@@ -296,6 +299,7 @@ test_mappings!(
 pub fn shuffle () {
     test_index!(
         [f32;2] as f32x2,
+        [f32;3] as f32x3,
         [f32;4] as f32x4,
         [f32;6] as f32x6,
         [f32;8] as f32x8,
@@ -319,6 +323,7 @@ pub fn shuffle () {
 pub fn index () {
     test_index!(
         [f32;2] as f32x2,
+        [f32;3] as f32x3,
         [f32;4] as f32x4,
         [f32;6] as f32x6,
         [f32;8] as f32x8,
@@ -342,6 +347,7 @@ pub fn index () {
 pub fn eq () {
     test_eq!(
         [f32;2] as f32x2,
+        [f32;3] as f32x3,
         [f32;4] as f32x4,
         [f32;6] as f32x6,
         [f32;8] as f32x8,
@@ -366,6 +372,7 @@ pub fn eq () {
 pub fn rnd () {
     test_rand!(
         [f32;2] as f32x2,
+        [f32;3] as f32x3,
         [f32;4] as f32x4,
         [f32;6] as f32x6,
         [f32;8] as f32x8,
@@ -390,6 +397,7 @@ pub fn rnd () {
 pub fn serialize () {
     test_serde!(
         [f32;2] as f32x2,
+        [f32;3] as f32x3,
         [f32;4] as f32x4,
         [f32;6] as f32x6,
         [f32;8] as f32x8,
@@ -413,6 +421,7 @@ pub fn serialize () {
 pub fn clone () {
     test_clone!(
         [f32;2] as f32x2,
+        [f32;3] as f32x3,
         [f32;4] as f32x4,
         [f32;6] as f32x6,
         [f32;8] as f32x8,
@@ -436,6 +445,7 @@ pub fn clone () {
 pub fn into () {
     test_into!(
         [f32;2] as f32x2,
+        [f32;3] as f32x3,
         [f32;4] as f32x4,
         [f32;6] as f32x6,
         [f32;8] as f32x8,
@@ -459,6 +469,7 @@ pub fn into () {
 pub fn from () {
     test_from!(
         [f32;2] as f32x2,
+        [f32;3] as f32x3,
         [f32;4] as f32x4,
         [f32;6] as f32x6,
         [f32;8] as f32x8,

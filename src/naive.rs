@@ -1,4 +1,4 @@
-use core::ops::*;
+ops_use!();
 use llml_simd_proc::*;
 
 macro_rules! impl_self_fns {

@@ -2,7 +2,7 @@ use core::ops::*;
 use core::mem::transmute;
 use core::ptr::addr_of;
 use llml_simd_proc::*;
-use crate::float::single::f32x4;
+use crate::float::{single::f32x4, double::f64x4};
 arch_use!();
 
 #[allow(non_camel_case_types)]
@@ -152,6 +152,144 @@ impl From<f32> for f32x6 {
 impl_clone!(f32x6, f32, 6);
 impl_scal_arith!(
     f32x6, f32,
+    Add, add,
+    Sub, sub,
+    Mul, mul,
+    Div, div
+);
+
+// DOUBLE VECTOR 3
+#[allow(non_camel_case_types)]
+#[repr(transparent)]
+#[derive(Copy, Assign)]
+#[assign_targets(Add, Sub, Mul, Div)]
+#[assign_rhs(Self, f64)]
+pub struct f64x3 (pub(crate) __m256d);
+
+impl f64x3 {
+    const DIV_MASK : __m256d = unsafe { transmute([u64::MAX, u64::MAX, u64::MAX, 0]) };
+    const ABS_MASK : __m256d = unsafe { transmute([i64::MAX, i64::MAX, i64::MAX, 0]) };
+
+    const MIN_MASK : __m256d = unsafe { transmute([0., 0., 0., f64::MAX]) };
+    const MAX_MASK : __m256d = unsafe { transmute([0., 0., 0., f64::MIN]) };
+
+    /// Loads values from the pointer into the SIMD vector
+    #[inline(always)]
+    pub unsafe fn load (ptr: *const f64) -> Self {
+        Self(_mm256_set_pd(0., *ptr.add(2), *ptr.add(1), *ptr))
+    }
+
+    /// Returns a vector with the absolute values of the original vector
+    #[inline(always)]
+    pub fn abs (self) -> Self {
+        unsafe { Self(_mm256_and_pd(Self::ABS_MASK, self.0)) }
+    }
+
+    /// Returns a vector with the absolute values of the original vector
+    #[inline(always)]
+    pub fn sqrt (self) -> Self {
+        unsafe { Self(_mm256_sqrt_pd(self.0)) }
+    }
+
+    /// Gets the smallest/minimum value of the vector
+    #[inline(always)]
+    pub fn min (self) -> f64 {
+        unsafe { f64x4(_mm256_or_pd(Self::MIN_MASK, self.0)).min() }
+    }
+
+    /// Gets the biggest/maximum value of the vector
+    #[inline(always)]
+    pub fn max (self) -> f64 {
+        unsafe { f64x4(_mm256_or_pd(Self::MAX_MASK, self.0)).max() }
+    }
+
+    /// Sums up all the values inside the vector
+    #[inline(always)]
+    pub fn sum (self) -> f64 {
+        f64x4(self.0).sum()
+    }
+
+    /// Returns a vector with the smallest/minimum value of each lane
+    #[inline(always)]
+    pub fn vmin (self, rhs: Self) -> Self {
+        unsafe { Self(_mm256_min_pd(self.0, rhs.0)) }
+    }
+
+    /// Returns a vector with the absolute values of the original vector
+    #[inline(always)]
+    pub fn vmax (self, rhs: Self) -> Self {
+        unsafe { Self(_mm256_max_pd(self.0, rhs.0)) }
+    }
+}
+
+impl Add for f64x3 {
+    type Output = Self;
+
+    #[inline(always)]
+    fn add (self, rhs: Self) -> Self::Output {
+        unsafe { Self(_mm256_add_pd(self.0, rhs.0)) }
+    }
+}
+
+impl Sub for f64x3 {
+    type Output = Self;
+
+    #[inline(always)]
+    fn sub (self, rhs: Self) -> Self::Output {
+        unsafe { Self(_mm256_sub_pd(self.0, rhs.0)) }
+    }
+}
+
+impl Mul for f64x3 {
+    type Output = Self;
+
+    #[inline(always)]
+    fn mul (self, rhs: Self) -> Self::Output {
+        unsafe { Self(_mm256_mul_pd(self.0, rhs.0)) }
+    }
+}
+
+impl Div for f64x3 {
+    type Output = Self;
+
+    #[inline(always)]
+    fn div (self, rhs: Self) -> Self::Output {
+        unsafe {
+            let div = _mm256_div_pd(self.0, rhs.0);
+            Self(_mm256_and_pd(Self::DIV_MASK, div))
+        }
+    }
+}
+
+impl Neg for f64x3 {
+    type Output = Self;
+
+    #[inline(always)]
+    fn neg (self) -> Self::Output {
+        unsafe { Self(_mm256_sub_pd(_mm256_setzero_pd(), self.0)) }
+    }
+}
+
+impl PartialEq for f64x3 {
+    #[inline(always)]
+    fn eq (&self, other: &Self) -> bool {
+        unsafe {
+            let cmp = _mm256_cmp_pd(self.0, other.0, 0);
+            let ptr = addr_of!(cmp) as *const u64;
+            *(ptr as *const u128) == u128::MAX && *ptr.add(2) == u64::MAX
+        }
+    }
+}
+
+impl From<f64> for f64x3 {
+    #[inline(always)]
+    fn from(x: f64) -> Self {
+        Self::new([x,x,x])
+    }
+}
+
+impl_scal_arith!(
+    f64x3, f64,
     Add, add,
     Sub, sub,
     Mul, mul,

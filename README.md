@@ -27,13 +27,13 @@ Thanks to WASM, ```llml_simd``` is available for JavaScript/TypeScript via npm.\
 You can install it into your Node project with ```npm i llml_simd```
 
 ## Features ##
-| Feature           | Description                                                                                         |
-| ----------------- | --------------------------------------------------------------------------------------------------- |
-| ```use_std```     | Enables std functions. Useful for naive implementation functions (like ```abs``` and ```sqrt```)    |
-| ```force_naive``` | Forces naive types (see [Naive implementation](#Naive-implementation))                              |
-| ```use_avx```     | Enables the use of AVX SIMD types (see [AVX support](#AVX-Support))                                 |
-| ```random```      | Enables random generation of vectors via [rand](https://github.com/rust-random/rand)                |
-| ```serialize```   | Enables serialization and deserialization of vectors via [serde](https://github.com/serde-rs/serde) |
+| Feature                 | Description                                                                                                                         |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| ```use_std```           | Enables standard library functionality. Enabled by default                                                                          |
+| ```force_naive```       | Forces naive types (see [Naive implementation](#Naive-implementation))                                                              |
+| ```use_avx```           | Enables the use of AVX SIMD types (see [AVX support](#AVX-Support))                                                                 |
+| ```random```            | Enables random generation of vectors via [rand](https://github.com/rust-random/rand)                                                |
+| ```serialize```         | Enables serialization and deserialization of vectors via [serde](https://github.com/serde-rs/serde)                                 |
 
 ## Examples ##
 ### Dot product (Rust) ###
@@ -49,7 +49,7 @@ pub fn main() {
 }
 ```
 
-### Dot product (JavaScript/TypeScript) ###
+### Dot product (JavaScript) ###
 ```js
 import { f32x4 } from llml_simd
 
