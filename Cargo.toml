@@ -28,6 +28,7 @@ llml_simd_proc = { version = "0.1", path = "./llml_simd_proc" }
 [dev-dependencies]
 criterion = "0.3"
 rand = "0.8.4"
+getrandom = { version = "0.2", features = ["js"] }
 serde_json = "1.0"
 
 [[bench]]

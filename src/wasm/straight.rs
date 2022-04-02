@@ -159,6 +159,12 @@ impl f32x4 {
         pmax as max: "Gets the biggest/maximum value of the vector", 
         add as sum: "Sums up all the values inside the vector"
     ); 
+
+    /// Interleaves elements of both vectors into one
+    #[inline(always)]
+    pub fn zip (self, rhs: Self) -> Self {
+        unsafe { Self(u32x4_shuffle::<0, 4, 1, 5>(self.0, rhs.0)) }
+    }
 }
 
 impl f64x2 {
@@ -187,6 +193,12 @@ impl f64x2 {
             let ptr = addr_of!(self) as *const f64;
             (*ptr).add(*ptr.add(1))
         }
+    }
+
+    /// Interleaves elements of both vectors into one
+    #[inline(always)]
+    pub fn zip (self, rhs: Self) -> Self {
+        unsafe { Self(u64x2_shuffle::<0, 2>(self.0, rhs.0)) }
     }
 }
 

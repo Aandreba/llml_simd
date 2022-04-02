@@ -81,6 +81,12 @@ impl f32x6 {
     pub fn vmax (self, rhs: Self) -> Self {
         unsafe { Self(_mm256_max_ps(self.0, rhs.0)) }
     }
+
+    /// Interleaves elements of both vectors into one
+    #[inline(always)]
+    pub fn zip (self, rhs: Self) -> Self {
+        unsafe { _mm256_and_ps(__m256_unpacklo_ps(self.0, rhs.0), DIV_MASK) }
+    }
 }
 
 impl Add for f32x6 {
@@ -219,6 +225,12 @@ impl f64x3 {
     #[inline(always)]
     pub fn vmax (self, rhs: Self) -> Self {
         unsafe { Self(_mm256_max_pd(self.0, rhs.0)) }
+    }
+
+    /// Interleaves elements of both vectors into one
+    #[inline(always)]
+    pub fn zip (self, rhs: Self) -> Self {
+        unsafe { _mm256_and_pd(__m256_unpacklo_pd(self.0, rhs.0), DIV_MASK) }
     }
 }
 

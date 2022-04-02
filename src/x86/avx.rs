@@ -166,6 +166,12 @@ macro_rules! impl_straight {
                     max as max: "Gets the biggest/maximum value of the vector",
                     add as sum: "Sums up all the values inside the vector"
                 );
+
+                /// Interleaves elements of both vectors into one
+                #[inline(always)]
+                pub fn zip (self, rhs: Self) -> Self {
+                    unsafe { Self(__mm_concat!(unpackhi, $ty)(self.0, rhs.0)) }
+                }
             }
 
             impl From<$ty> for $target {

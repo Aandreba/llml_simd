@@ -104,7 +104,6 @@ macro_rules! impl_index {
 
 impl_generic!(
     f32x2, f32, 2,
-    f32x3, f32, 3,
     f32x4, f32, 4,
     f32x6, f32, 6,
     f32x8, f32, 8,
@@ -114,7 +113,6 @@ impl_generic!(
     f32x16, f32, 16,
 
     f64x2, f64, 2,
-    f64x3, f64, 3,
     f64x4, f64, 4,
     f64x6, f64, 6,
     f64x8, f64, 8,
@@ -126,15 +124,12 @@ impl_generic!(
 
 impl_clone!(
     f32x2, f32, 2,
-    f32x3, f32, 3,
     f32x4, f32, 4,
-    f64x2, f64, 2,
-    f64x3, f64, 3
+    f64x2, f64, 2
 );
 
 impl_index!(
     f32x2, f32, 2,
-    f32x3, f32, 3,
     f32x4, f32, 4,
     f32x6, f32, 6,
     f32x8, f32, 8,
@@ -144,7 +139,6 @@ impl_index!(
     f32x16, f32, 16,
 
     f64x2, f64, 2,
-    f64x3, f64, 3,
     f64x4, f64, 4,
     f64x6, f64, 6,
     f64x8, f64, 8,

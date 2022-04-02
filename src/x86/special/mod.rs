@@ -1,6 +1,6 @@
 use cfg_if::cfg_if;
 mod sse;
-pub use self::sse::{f32x2, f32x3};
+pub use self::sse::{f32x2};
 
 cfg_if! {
     if #[cfg(all(feature = "use_avx", target_feature = "avx"))] {

@@ -70,6 +70,12 @@ impl f32x2 {
     pub fn vmax (self, rhs: Self) -> Self {
         unsafe { Self(f32x4_pmax(self.0, rhs.0)) }
     }
+
+    /// Interleaves elements of both vectors into one
+    #[inline(always)]
+    pub fn zip (self, rhs: Self) -> Self {
+        unsafe { Self(u32x4_shuffle::<0, 4, 2, 2>(self.0, rhs.0)) }
+    }
 }
 
 impl Add for f32x2 {

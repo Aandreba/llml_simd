@@ -1,4 +1,5 @@
-use core::mem::transmute;
+use core::mem::*;
+use core::ptr::*;
 use llml_simd_proc::*;
 use derive_more::*;
 use crate::x86::special::*;
@@ -182,6 +183,12 @@ macro_rules! impl_straight {
                     $ty,
                     add as sum: "Sums up all the values inside the vector"
                 );
+
+                /// Interleaves elements of both vectors into one
+                #[inline(always)]
+                pub fn zip (self, rhs: Self) -> Self {
+                    unsafe { Self(_mm_concat!(unpacklo, $ty)(self.0, rhs.0)) }
+                }
             }
 
             impl From<$ty> for $target {
