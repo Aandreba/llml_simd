@@ -16,7 +16,6 @@ macro_rules! impl_rand {
 
 impl_rand!(
     [f32;2] as f32x2,
-    [f32;3] as f32x3,
     [f32;4] as f32x4,
     [f32;6] as f32x6,
     [f32;8] as f32x8,
@@ -26,7 +25,6 @@ impl_rand!(
     [f32;16] as f32x16,
 
     [f64;2] as f64x2,
-    [f64;3] as f64x3,
     [f64;4] as f64x4,
     [f64;6] as f64x6,
     [f64;8] as f64x8,

@@ -181,7 +181,8 @@ macro_rules! impl_straight {
 
                 impl_hoz_fns_straight!(
                     $ty,
-                    add as sum: "Sums up all the values inside the vector"
+                    add as sum: "Sums up all the values inside the vector",
+                    mul as prod: "Multiplies all the values inside the vector"
                 );
 
                 /// Interleaves elements of both vectors into one

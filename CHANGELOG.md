@@ -8,4 +8,5 @@ v0.1.3
 v0.1.4
 - Fixed bug where force_naive enable correctly
 - Improved sqrt performance on x86/x86_64
+- Added ```prod``` and ```mul_add``` methods
 - Added ```zip``` method

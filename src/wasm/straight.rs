@@ -157,7 +157,8 @@ impl f32x4 {
     f32x4_hoz!(
         pmin as min: "Gets the smallest/minimum value of the vector",
         pmax as max: "Gets the biggest/maximum value of the vector", 
-        add as sum: "Sums up all the values inside the vector"
+        add as sum: "Sums up all the values inside the vector",
+        mul as prod: "Multiplies all the values inside the vector"
     ); 
 
     /// Interleaves elements of both vectors into one
@@ -192,6 +193,15 @@ impl f64x2 {
         unsafe { 
             let ptr = addr_of!(self) as *const f64;
             (*ptr).add(*ptr.add(1))
+        }
+    }
+
+    /// Multiplies all the values inside the vector
+    #[inline(always)]
+    pub fn prod (self) -> f64 {
+        unsafe { 
+            let ptr = addr_of!(self) as *const f64;
+            (*ptr).mul(*ptr.add(1))
         }
     }
 

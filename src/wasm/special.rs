@@ -59,6 +59,15 @@ impl f32x2 {
         }
     }
 
+    /// Multiplies the vector by a scalar
+    #[inline(always)]
+    pub fn prod (self) -> f32 {
+        unsafe {
+            let ptr = addr_of!(self) as *const f32;
+            *ptr * *ptr.add(1)
+        }
+    }
+
     /// Returns a vector with the smallest/minimum value of each lane
     #[inline(always)]
     pub fn vmin (self, rhs: Self) -> Self {

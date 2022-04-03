@@ -215,6 +215,12 @@ impl f64x3 {
         f64x4(self.0).sum()
     }
 
+     /// Multiplies all the values inside the vector
+     #[inline(always)]
+     pub fn prod (self) -> f64 {
+         f64x4(self.0).prod()
+     }
+
     /// Returns a vector with the smallest/minimum value of each lane
     #[inline(always)]
     pub fn vmin (self, rhs: Self) -> Self {

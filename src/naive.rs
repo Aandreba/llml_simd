@@ -22,6 +22,7 @@ macro_rules! impl_self_fns {
     };
 
     (1, $fun:ident, $ty:ident, $len:literal, $docs:expr) => {
+        #[cfg(feature = "use_std")]
         #[doc=concat!("Returns a vector with the ", $docs, " of the original vector")]
         #[inline(always)]
         pub fn $fun (self) -> Self {
@@ -30,6 +31,7 @@ macro_rules! impl_self_fns {
     };
 
     (1, $fun:ident, $name:ident, $ty:ident, $len:literal, $docs:expr) => {
+        #[cfg(feature = "use_std")]
         #[doc=concat!("Returns a vector with the ", $docs, " of the original vector")]
         #[inline(always)]
         pub fn $name (self) -> Self {
@@ -188,6 +190,12 @@ macro_rules! impl_naive {
                     min as vmin: "smallest/minimum value",
                     max as vmax: "biggest/maximum value"
                 );
+
+                /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+                #[inline(always)]
+                pub fn mul_add (self, rhs: Self, add: Self) -> Self {
+                    Self(array(|i| self[i].mul_add(rhs[i], add[i])))
+                }
 
                 /// Interleaves elements of both vectors into one
                 #[inline(always)]

@@ -163,6 +163,12 @@ macro_rules! impl_straight {
                     max as vmax $(with $tag)?: "biggest/maximum value"
                 );
 
+                /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+                #[inline(always)]
+                pub fn mul_add (self, rhs: Self, add: Self) -> Self {
+                    unsafe { Self(concat_idents!(vfma, $($tag,)? _, $ty)(add.0, rhs.0, self.0)) }
+                }
+
                 /// Interleaves elements of both vectors into one
                 #[inline(always)]
                 pub fn zip (self, rhs: Self) -> Self {
@@ -188,6 +194,35 @@ macro_rules! impl_straight {
             }
         )*
     };
+}
+
+impl f32x2 {
+    /// Multiplies all the values inside the vector
+    #[inline(always)]
+    pub fn prod (self) -> f32 {
+        unsafe { vdups_lane_f32::<0>(self.0) * vdups_lane_f32::<1>(self.0) }
+    }
+}
+
+impl f32x4 {
+    /// Multiplies all the values inside the vector
+    #[inline(always)]
+    pub fn prod (self) -> f32 {
+        unsafe {
+            let alpha = vtrn1q_f32(self.0, self.0);
+            let beta = vtrn2q_f32(self.0, self.0);
+            let mul = vmulq_f32(alpha, beta);
+            vdups_laneq_f32::<0>(mul) * vdups_laneq_f32::<2>(mul)
+        }
+    }
+}
+
+impl f64x2 {
+    /// Multiplies all the values inside the vector
+    #[inline(always)]
+    pub fn prod (self) -> f64 {
+        unsafe { vdupd_laneq_f64::<0>(self.0) * vdupd_laneq_f64::<1>(self.0) }
+    }
 }
 
 impl_straight!(

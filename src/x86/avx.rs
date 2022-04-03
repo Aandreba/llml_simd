@@ -164,7 +164,8 @@ macro_rules! impl_straight {
                     $ty,
                     min as min: "Gets the smallest/minimum value of the vector",
                     max as max: "Gets the biggest/maximum value of the vector",
-                    add as sum: "Sums up all the values inside the vector"
+                    add as sum: "Sums up all the values inside the vector",
+                    mul as prod: "Multiplies all the values inside the vector",
                 );
 
                 /// Interleaves elements of both vectors into one

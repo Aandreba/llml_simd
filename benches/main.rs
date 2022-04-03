@@ -1,4 +1,4 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, Criterion};
 use llml_simd::float::{single::*, double::*};
 use llml_simd_proc::*;
 use core::ops::*;
@@ -80,10 +80,11 @@ macro_rules! bench_horiz {
 }
 
 bench_other!(add, sub, mul, div, vmin, vmax);
-bench_horiz!(min, max, sum);
+bench_horiz!(min, max, sum, prod);
 
 criterion_group!(benches, 
     add, sub, mul, div, vmin, vmax,
-    min, max, sum
+    min, max, sum, prod
 );
+
 criterion_main!(benches);

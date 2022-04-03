@@ -261,7 +261,8 @@ macro_rules! impl_composite {
                     2, $ty,
                     min as min, "Gets the smallest/minimum value of the vector",
                     max as max, "Gets the biggest/maximum value of the vector",
-                    add as sum, "Sums up all the values inside the vector"
+                    add as sum, "Sums up all the values inside the vector",
+                    mul as prod, "Multiplies all the values inside the vector"
                 );
 
                 impl_other_fns!(
@@ -269,6 +270,15 @@ macro_rules! impl_composite {
                     vmin, "smallest/minimum value",
                     vmax, "biggest/maximum value"
                 );
+
+                /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+                #[inline(always)]
+                pub fn mul_add (self, rhs: Self, add: Self) -> Self {
+                    Self (
+                        self.0.mul_add(rhs.0, add.0),
+                        self.1.mul_add(rhs.1, add.1)
+                    )
+                }
 
                 /// Interleaves elements of both vectors into one
                 #[inline(always)]
@@ -351,11 +361,28 @@ macro_rules! impl_composite {
                     <concat_idents!($ty, x4)>::from(array).sum()
                 }
 
+                #[doc="Multiplies all the values inside the vector"]
+                #[inline(always)]
+                pub fn prod (self) -> $ty {
+                    let array = [self.0.prod(), self.1.prod(), self.2.prod(), 1.];
+                    <concat_idents!($ty, x4)>::from(array).prod()
+                }
+
                 impl_other_fns!(
                     3,
                     vmin, "smallest/minimum value",
                     vmax, "biggest/maximum value"
                 );
+
+                /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+                #[inline(always)]
+                pub fn mul_add (self, rhs: Self, add: Self) -> Self {
+                    Self (
+                        self.0.mul_add(rhs.0, add.0),
+                        self.1.mul_add(rhs.1, add.1),
+                        self.2.mul_add(rhs.2, add.2)
+                    )
+                }
 
                 /// Interleaves elements of both vectors into one
                 #[inline(always)]
@@ -428,7 +455,8 @@ macro_rules! impl_composite {
                     4, $ty,
                     min, "Gets the smallest/minimum value of the vector",
                     max, "Gets the biggest/maximum value of the vector",
-                    sum, "Sums up all the values inside the vector"
+                    sum, "Sums up all the values inside the vector",
+                    prod, "Multiplies all the values inside the vector"
                 );
 
                 impl_other_fns!(
@@ -436,6 +464,17 @@ macro_rules! impl_composite {
                     vmin, "smallest/minimum value",
                     vmax, "biggest/maximum value"
                 );
+
+                /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+                #[inline(always)]
+                pub fn mul_add (self, rhs: Self, add: Self) -> Self {
+                    Self (
+                        self.0.mul_add(rhs.0, add.0),
+                        self.1.mul_add(rhs.1, add.1),
+                        self.2.mul_add(rhs.2, add.2),
+                        self.3.mul_add(rhs.3, add.3)
+                    )
+                }
 
                 /// Interleaves elements of both vectors into one
                 #[inline(always)]
