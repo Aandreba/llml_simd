@@ -1,6 +1,6 @@
 [![Crates.io](https://img.shields.io/crates/v/llml_simd)](https://crates.io/crates/llml_simd)
 [![NPM](https://img.shields.io/npm/v/llml_simd)](https://www.npmjs.com/package/llml_simd)
-[![Rust docs](https://img.shields.io/docsrs/llml_simd)](https://docs.rs/llml_simd/0.1.2/llml_simd/)
+[![Rust docs](https://img.shields.io/docsrs/llml_simd)](https://docs.rs/llml_simd/latest/llml_simd/)
 
 # LLML's SIMD
 SIMD (**S**ingle **I**nstruction **M**ultiple **D**ata) extension for a variety of targets.
