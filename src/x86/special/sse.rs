@@ -82,6 +82,12 @@ impl f32x2 {
         unsafe { Self(_mm_max_ps(self.0, rhs.0)) }
     }
 
+    /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+    #[inline(always)]
+    pub fn mul_add (self, rhs: Self, add: Self) -> Self {
+        Self(f32x4(self.0).fma(f32x4(rhs.0), f32x4(add.0)).0)
+    }
+
     /// Interleaves elements of both vectors into one
     #[inline(always)]
     pub fn zip (self, rhs: Self) -> Self {

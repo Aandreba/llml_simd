@@ -272,6 +272,9 @@ macro_rules! impl_composite {
                 );
 
                 /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+                /// # Compatibility
+                /// The fused multiply-add operation is only available on arm/aarch64 and x86/x86-64 with the target feature ```fma```.
+                /// For the rest of targets, a regular multiplication and addition are performed
                 #[inline(always)]
                 pub fn mul_add (self, rhs: Self, add: Self) -> Self {
                     Self (
@@ -375,6 +378,9 @@ macro_rules! impl_composite {
                 );
 
                 /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+                /// # Compatibility
+                /// The fused multiply-add operation is only available on arm/aarch64 and x86/x86-64 with the target feature ```fma```.
+                /// For the rest of targets, a regular multiplication and addition are performed
                 #[inline(always)]
                 pub fn mul_add (self, rhs: Self, add: Self) -> Self {
                     Self (
@@ -466,6 +472,9 @@ macro_rules! impl_composite {
                 );
 
                 /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+                /// # Compatibility
+                /// The fused multiply-add operation is only available on arm/aarch64 and x86/x86-64 with the target feature ```fma```.
+                /// For the rest of targets, a regular multiplication and addition are performed
                 #[inline(always)]
                 pub fn mul_add (self, rhs: Self, add: Self) -> Self {
                     Self (
