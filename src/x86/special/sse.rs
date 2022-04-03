@@ -85,7 +85,7 @@ impl f32x2 {
     /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
     #[inline(always)]
     pub fn mul_add (self, rhs: Self, add: Self) -> Self {
-        Self(f32x4(self.0).fma(f32x4(rhs.0), f32x4(add.0)).0)
+        Self(f32x4(self.0).mul_add(f32x4(rhs.0), f32x4(add.0)).0)
     }
 
     /// Interleaves elements of both vectors into one

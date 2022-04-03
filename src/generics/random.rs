@@ -6,6 +6,7 @@ macro_rules! impl_rand {
     ($([$ty:ident;$len:literal] as $target:ident),+) => {
         $(
             impl Distribution<$target> for Standard {
+                #[inline(always)]
                 fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> $target {
                     <[$ty;$len] as Into<$target>>::into(self.sample(rng))
                 }

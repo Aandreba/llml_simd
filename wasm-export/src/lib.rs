@@ -101,7 +101,7 @@ macro_rules! wasm_export {
 
                 #[inline(always)]
                 pub fn get (&self, idx: usize) -> $ty {
-                    unsafe { *(addr_of!(self.0) as *const $ty).add(idx) }
+                    self.0[idx]
                 }
 
                 #[inline(always)]
@@ -126,6 +126,12 @@ macro_rules! wasm_export {
 
                 #[allow(non_snake_case)]
                 #[inline(always)]
+                pub fn mulAdd (&self, other: &$target, add: &$target) -> Self {
+                    Self(self.0.mul_add(other.0, add.0))
+                }
+
+                #[allow(non_snake_case)]
+                #[inline(always)]
                 pub fn toArray(&self) -> wasm_export!(@array $ty) {
                     let slice : &[$ty] = &Into::<[$ty;$len]>::into(self.0);
                     slice.into()
@@ -140,12 +146,12 @@ macro_rules! wasm_export {
 
             wasm_import!(
                 @other $target, 
-                add, sub, mul, div, vmin, vmax
+                add, sub, mul, div, vmin, vmax, zip
             );
 
             wasm_import!(
                 @hoz $target, $ty,
-                min, max, sum
+                min, max, sum, prod
             );
 
             wasm_import!(

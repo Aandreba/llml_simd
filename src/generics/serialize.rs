@@ -8,6 +8,7 @@ macro_rules! impl_ser {
     ($([$ty:ident;$len:literal] as $target:ident),+) => {
         $(
             impl Serialize for $target {
+                #[inline]
                 fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: serde::Serializer {
                     let mut seq = serializer.serialize_seq(Some($len))?;
                     for i in 0..$len {
@@ -24,6 +25,7 @@ macro_rules! impl_de {
     ($([$ty:ident;$len:literal] as $target:ident),+) => {
         $(
             impl<'de> Deserialize<'de> for $target {
+                #[inline]
                 fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where D: serde::Deserializer<'de> {
                     let array = <[$ty;$len] as Deserialize<'de>>::deserialize(deserializer)?;
                     Ok(Self::from(array))

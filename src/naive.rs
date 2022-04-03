@@ -141,14 +141,28 @@ macro_rules! impl_naive {
 
                 /// Returns a reference to the value in the specified lane without checking if it’s within range
                 #[inline(always)]
-                pub unsafe fn index_unchecked (&self, idx: usize) -> &$ty {
+                pub unsafe fn get_unchecked (&self, idx: usize) -> &$ty {
                     self.index(idx)
+                }
+
+                /// Returns a reference to the value in the specified lane without checking if it's within range
+                #[deprecated(since="0.1.4", note="use ```get_unchecked``` instead")]
+                #[inline(always)]
+                pub unsafe fn index_unchecked (&self, idx: usize) -> &$ty {
+                    self.get_unchecked(idx)
                 }
 
                 /// Returns a mutable reference to the value in the specified lane without checking if it’s within range
                 #[inline(always)]
-                pub unsafe fn index_mut_unchecked (&mut self, idx: usize) -> &mut $ty {
+                pub unsafe fn get_mut_unchecked (&mut self, idx: usize) -> &mut $ty {
                     self.index_mut(idx)
+                }
+
+                /// Returns a mutable reference to the value in the specified lane without checking if it’s within range
+                #[deprecated(since="0.1.4", note="use ```get_mut_unchecked``` instead")]
+                #[inline(always)]
+                pub unsafe fn index_mut_unchecked (&mut self, idx: usize) -> &mut $ty {
+                    self.get_mut_unchecked(idx)
                 }
 
                 impl_self_fns!(
@@ -192,9 +206,23 @@ macro_rules! impl_naive {
                 );
 
                 /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+                /// # Compatibility
+                /// The fused multiply-add operation is only available on arm/aarch64 and x86/x86-64 with the target feature ```fma```.
+                /// For the rest of targets, a regular multiplication and addition are performed
+                #[cfg(feature = "use_std")]
                 #[inline(always)]
                 pub fn mul_add (self, rhs: Self, add: Self) -> Self {
                     Self(array(|i| self[i].mul_add(rhs[i], add[i])))
+                }
+
+                /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+                /// # Compatibility
+                /// The fused multiply-add operation is only available on arm/aarch64 and x86/x86-64 with the target feature ```fma```.
+                /// For the rest of targets, a regular multiplication and addition are performed
+                #[cfg(not(feature = "use_std"))]
+                #[inline(always)]
+                pub fn mul_add (self, rhs: Self, add: Self) -> Self {
+                    Self(array(|i| (self[i] * rhs[i]) + add[i]))
                 }
 
                 /// Interleaves elements of both vectors into one

@@ -507,17 +507,3 @@ pub fn fma () {
         [f64;16] as f64x16
     );
 }
-
-#[test]
-fn mul_add () {
-    let array = [core::f32::consts::FRAC_1_PI, 0.0012];
-    let simd = f32x2::new(array);
-    let simd = simd.mul_add(simd, simd);
-
-    let reg = array.into_iter()
-        .map(|x| x.mul_add(x, x))
-        .enumerate()
-        .for_each(|(i, x)| {
-            assert_eq!(x, simd[i]);
-        });
-}

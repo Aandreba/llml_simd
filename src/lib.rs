@@ -32,18 +32,24 @@ macro_rules! import {
 
 include!("composite.rs");
 
+#[cfg(feature = "random")]
+include!("generics/random.rs");
+
+#[cfg(feature = "serialize")]
+include!("generics/serialize.rs");
+
 cfg_if::cfg_if! {
     if #[cfg(feature = "force_naive")] {
         mod naive;
     } else if #[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "sse"))] {
         mod x86;
-        flat_mod!(generics);
+        include!("generics/float.rs");
     } else if #[cfg(all(any(target_arch = "arm", target_arch = "aarch64"), target_feature = "neon"))] {
         mod arm;
-        flat_mod!(generics);
+        include!("generics/float.rs");
     } else if #[cfg(all(target_arch = "wasm32", target_feature = "simd128"))] {
         mod wasm;
-        flat_mod!(generics);
+        include!("generics/float.rs");
     } else {
         mod naive;
     }

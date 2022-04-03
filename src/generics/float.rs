@@ -64,16 +64,30 @@ macro_rules! impl_index {
             impl $target {
                 /// Returns a reference to the value in the specified lane without checking if it's within range
                 #[inline(always)]
-                pub unsafe fn index_unchecked (&self, idx: usize) -> &$ty {
+                pub unsafe fn get_unchecked (&self, idx: usize) -> &$ty {
                     let ptr = self as *const Self as *const $ty;
                     &*ptr.add(idx)
                 }
 
                 /// Returns a mutable reference to the value in the specified lane without checking if it's within range
                 #[inline(always)]
-                pub unsafe fn index_mut_unchecked (&mut self, idx: usize) -> &mut $ty {
+                pub unsafe fn get_mut_unchecked (&mut self, idx: usize) -> &mut $ty {
                     let ptr = self as *mut Self as *mut $ty;
                     &mut *ptr.add(idx)
+                }
+
+                /// Returns a reference to the value in the specified lane without checking if it's within range
+                #[deprecated(since="0.1.4", note="use ```get_unchecked``` instead")]
+                #[inline(always)]
+                pub unsafe fn index_unchecked (&self, idx: usize) -> &$ty {
+                    self.get_unchecked(idx)
+                }
+
+                /// Returns a mutable reference to the value in the specified lane without checking if it's within range
+                #[deprecated(since="0.1.4", note="use ```get_mut_unchecked``` instead")]
+                #[inline(always)]
+                pub unsafe fn index_mut_unchecked (&mut self, idx: usize) -> &mut $ty {
+                    self.get_mut_unchecked(idx)
                 }
             }
 

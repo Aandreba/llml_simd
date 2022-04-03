@@ -1,6 +1,6 @@
 [package]
-name = "llml_simd"
-version = "0.1.0"
+name = "llml_simd_js"
+version = "0.1.1"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/Aandreba/llml_simd"
