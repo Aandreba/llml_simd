@@ -157,8 +157,24 @@ impl f32x4 {
     f32x4_hoz!(
         pmin as min: "Gets the smallest/minimum value of the vector",
         pmax as max: "Gets the biggest/maximum value of the vector", 
-        add as sum: "Sums up all the values inside the vector"
+        add as sum: "Sums up all the values inside the vector",
+        mul as prod: "Multiplies all the values inside the vector"
     ); 
+
+    /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+    /// # Compatibility
+    /// The fused multiply-add operation is only available on arm/aarch64 and x86/x86-64 with the target feature ```fma```.
+    /// For the rest of targets, a regular multiplication and addition are performed
+    #[inline(always)]
+    pub fn mul_add (self, rhs: Self, add: Self) -> Self {
+        (self * rhs) + add
+    }
+
+    /// Interleaves elements of both vectors into one
+    #[inline(always)]
+    pub fn zip (self, rhs: Self) -> Self {
+        unsafe { Self(u32x4_shuffle::<0, 4, 1, 5>(self.0, rhs.0)) }
+    }
 }
 
 impl f64x2 {
@@ -187,6 +203,30 @@ impl f64x2 {
             let ptr = addr_of!(self) as *const f64;
             (*ptr).add(*ptr.add(1))
         }
+    }
+
+    /// Multiplies all the values inside the vector
+    #[inline(always)]
+    pub fn prod (self) -> f64 {
+        unsafe { 
+            let ptr = addr_of!(self) as *const f64;
+            (*ptr).mul(*ptr.add(1))
+        }
+    }
+
+    /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+    /// # Compatibility
+    /// The fused multiply-add operation is only available on arm/aarch64 and x86/x86-64 with the target feature ```fma```.
+    /// For the rest of targets, a regular multiplication and addition are performed
+    #[inline(always)]
+    pub fn mul_add (self, rhs: Self, add: Self) -> Self {
+        (self * rhs) + add
+    }
+
+    /// Interleaves elements of both vectors into one
+    #[inline(always)]
+    pub fn zip (self, rhs: Self) -> Self {
+        unsafe { Self(u64x2_shuffle::<0, 2>(self.0, rhs.0)) }
     }
 }
 

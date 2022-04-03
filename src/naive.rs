@@ -1,5 +1,18 @@
-ops_use!();
 use llml_simd_proc::*;
+use core::ops::*;
+use std::mem::MaybeUninit;
+
+#[inline]
+fn array<T, F: Fn(usize) -> T, const N: usize> (f: F) -> [T; N] {
+    let mut array = MaybeUninit::<[T;N]>::uninit();
+    let ptr : *mut T = array.as_mut_ptr().cast();
+
+    for i in 0..N {
+        unsafe { ptr.add(i).write(f(i)); }
+    }
+
+    unsafe { array.assume_init() }
+}
 
 macro_rules! impl_self_fns {
     ([$ty:ident;$len:literal], $($fun:ident $(as $name:ident)?: $docs:expr),+) => {
@@ -9,18 +22,20 @@ macro_rules! impl_self_fns {
     };
 
     (1, $fun:ident, $ty:ident, $len:literal, $docs:expr) => {
+        #[cfg(feature = "use_std")]
         #[doc=concat!("Returns a vector with the ", $docs, " of the original vector")]
         #[inline(always)]
         pub fn $fun (self) -> Self {
-            Self(arr![|i| (self[i] as $ty).$fun();$len])
+            Self(array(|i| (self[i] as $ty).$fun()))
         }
     };
 
     (1, $fun:ident, $name:ident, $ty:ident, $len:literal, $docs:expr) => {
+        #[cfg(feature = "use_std")]
         #[doc=concat!("Returns a vector with the ", $docs, " of the original vector")]
         #[inline(always)]
         pub fn $name (self) -> Self {
-            Self(arr![|i| (self[i] as $ty).$fun();$len])
+            Self(array(|i| (self[i] as $ty).$fun()))
         }
     };
 }
@@ -36,7 +51,7 @@ macro_rules! impl_other_fns {
         #[doc=concat!("Returns a vector with the ", $docs, " of each lane")]
         #[inline(always)]
         pub fn $fun (self, rhs: Self) -> Self {
-            Self(arr![|i| (self[i] as $ty).$fun(rhs[i] as $ty);$len])
+            Self(array(|i| (self[i] as $ty).$fun(rhs[i] as $ty)))
         }
     };
 
@@ -44,7 +59,7 @@ macro_rules! impl_other_fns {
         #[doc=concat!("Returns a vector with the ", $docs, " of each lane")]
         #[inline(always)]
         pub fn $name (self, rhs: Self) -> Self {
-            Self(arr![|i| (self[i] as $ty).$fun(rhs[i] as $ty);$len])
+            Self(array(|i| (self[i] as $ty).$fun(rhs[i] as $ty)))
         }
     };
 }
@@ -57,7 +72,7 @@ macro_rules! impl_naive {
 
                 #[inline(always)]
                 fn $fun (self, rhs: Self) -> Self::Output {
-                    let arr = arr![|i| (self.0[i] as $ty).$fun(rhs.0[i]); $len];
+                    let arr = array(|i| (self.0[i] as $ty).$fun(rhs.0[i]));
                     Self(arr)
                 }
             }
@@ -67,7 +82,7 @@ macro_rules! impl_naive {
 
                 #[inline(always)]
                 fn $fun (self, rhs: $ty) -> Self::Output {
-                    Self(arr![|i| (self.0[i] as $ty).$fun(rhs); $len])
+                    Self(array(|i| (self.0[i] as $ty).$fun(rhs)))
                 }
             }
 
@@ -76,7 +91,7 @@ macro_rules! impl_naive {
 
                 #[inline(always)]
                 fn $fun (self, rhs: $target) -> Self::Output {
-                    $target(arr![|i| self.$fun(rhs.0[i]); $len])
+                    $target(array(|i| self.$fun(rhs.0[i])))
                 }
             }
         )*
@@ -102,7 +117,7 @@ macro_rules! impl_naive {
                 type Output = Self;
 
                 fn neg (self) -> Self::Output {
-                    Self(arr![|i| self[i].neg();$len])
+                    Self(array(|i| self[i].neg()))
                 }
             }
 
@@ -126,14 +141,28 @@ macro_rules! impl_naive {
 
                 /// Returns a reference to the value in the specified lane without checking if it’s within range
                 #[inline(always)]
-                pub unsafe fn index_unchecked (&self, idx: usize) -> &$ty {
+                pub unsafe fn get_unchecked (&self, idx: usize) -> &$ty {
                     self.index(idx)
+                }
+
+                /// Returns a reference to the value in the specified lane without checking if it's within range
+                #[deprecated(since="0.1.4", note="use ```get_unchecked``` instead")]
+                #[inline(always)]
+                pub unsafe fn index_unchecked (&self, idx: usize) -> &$ty {
+                    self.get_unchecked(idx)
                 }
 
                 /// Returns a mutable reference to the value in the specified lane without checking if it’s within range
                 #[inline(always)]
-                pub unsafe fn index_mut_unchecked (&mut self, idx: usize) -> &mut $ty {
+                pub unsafe fn get_mut_unchecked (&mut self, idx: usize) -> &mut $ty {
                     self.index_mut(idx)
+                }
+
+                /// Returns a mutable reference to the value in the specified lane without checking if it’s within range
+                #[deprecated(since="0.1.4", note="use ```get_mut_unchecked``` instead")]
+                #[inline(always)]
+                pub unsafe fn index_mut_unchecked (&mut self, idx: usize) -> &mut $ty {
+                    self.get_mut_unchecked(idx)
                 }
 
                 impl_self_fns!(
@@ -164,11 +193,62 @@ macro_rules! impl_naive {
                     self.0.iter().sum::<$ty>()
                 }
 
+                /// Multiplies all the values inside the vector
+                #[inline(always)]
+                pub fn prod (self) -> $ty {
+                    self.0.iter().product::<$ty>()
+                }
+
                 impl_other_fns!(
                     [$ty;$len],
                     min as vmin: "smallest/minimum value",
                     max as vmax: "biggest/maximum value"
                 );
+
+                /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+                /// # Compatibility
+                /// The fused multiply-add operation is only available on arm/aarch64 and x86/x86-64 with the target feature ```fma```.
+                /// For the rest of targets, a regular multiplication and addition are performed
+                #[cfg(feature = "use_std")]
+                #[inline(always)]
+                pub fn mul_add (self, rhs: Self, add: Self) -> Self {
+                    Self(array(|i| self[i].mul_add(rhs[i], add[i])))
+                }
+
+                /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+                /// # Compatibility
+                /// The fused multiply-add operation is only available on arm/aarch64 and x86/x86-64 with the target feature ```fma```.
+                /// For the rest of targets, a regular multiplication and addition are performed
+                #[cfg(not(feature = "use_std"))]
+                #[inline(always)]
+                pub fn mul_add (self, rhs: Self, add: Self) -> Self {
+                    Self(array(|i| (self[i] * rhs[i]) + add[i]))
+                }
+
+                /// Interleaves elements of both vectors into one
+                #[inline(always)]
+                pub fn zip (self, rhs: Self) -> Self {
+                    let self_ptr : *const $ty = core::ptr::addr_of!(self).cast();
+                    let rhs_ptr : *const $ty = core::ptr::addr_of!(rhs).cast();
+
+                    let mut result = MaybeUninit::<[$ty;$len]>::uninit();
+                    let ptr : *mut $ty = result.as_mut_ptr().cast();
+
+                    let mut i = 0;
+                    let mut j = 0;
+
+                    while (i < $len) {
+                        unsafe {
+                            ptr.add(i).write(self_ptr.add(j).read());
+                            ptr.add(i+1).write(rhs_ptr.add(j).read());
+                        }
+
+                        j += 1;
+                        i += 2;
+                    }
+
+                    unsafe { Self(result.assume_init()) }
+                }
             }
 
             impl Index<usize> for $target {
@@ -206,6 +286,13 @@ macro_rules! impl_naive {
                 }
             }
 
+            impl From<$ty> for $target {
+                #[inline(always)]
+                fn from (x: $ty) -> Self {
+                    Self::filled_with(x)
+                }
+            }
+
             impl Into<[$ty;$len]> for $target {
                 #[inline(always)]
                 fn into (self) -> [$ty;$len] {
@@ -216,43 +303,9 @@ macro_rules! impl_naive {
     };
 }
 
-cfg_if::cfg_if! {
-    if #[cfg(not(feature = "use_std"))] {
-        use core::mem::transmute;
-
-        trait FloatExt {
-            fn abs(self) -> Self;
-            fn sqrt(self) -> Self;
-        }
-        
-        impl FloatExt for f32 {
-            #[inline(always)]
-            fn abs (self) -> f32 {
-                unsafe { transmute::<i32,f32>(transmute::<f32,i32>(self) & i32::MAX) }
-            }
-        
-            #[inline(always)]
-            fn sqrt (self) -> f32 {
-                todo!()
-            }
-        }
-
-        impl FloatExt for f64 {
-            #[inline(always)]
-            fn abs (self) -> f64 {
-                unsafe { transmute::<i64,f64>(transmute::<f64,i64>(self) & i64::MAX) }
-            }
-        
-            #[inline(always)]
-            fn sqrt (self) -> f64 {
-                todo!()
-            }
-        }
-    }
-}
-
 impl_naive!(
     [f32;2] as f32x2,
+    [f32;3] as f32x3,
     [f32;4] as f32x4,
     [f32;6] as f32x6,
     [f32;8] as f32x8,
@@ -262,6 +315,7 @@ impl_naive!(
     [f32;16] as f32x16,
 
     [f64;2] as f64x2,
+    [f64;3] as f64x3,
     [f64;4] as f64x4,
     [f64;6] as f64x6,
     [f64;8] as f64x8,

@@ -59,6 +59,15 @@ impl f32x2 {
         }
     }
 
+    /// Multiplies the vector by a scalar
+    #[inline(always)]
+    pub fn prod (self) -> f32 {
+        unsafe {
+            let ptr = addr_of!(self) as *const f32;
+            *ptr * *ptr.add(1)
+        }
+    }
+
     /// Returns a vector with the smallest/minimum value of each lane
     #[inline(always)]
     pub fn vmin (self, rhs: Self) -> Self {
@@ -69,6 +78,21 @@ impl f32x2 {
     #[inline(always)]
     pub fn vmax (self, rhs: Self) -> Self {
         unsafe { Self(f32x4_pmax(self.0, rhs.0)) }
+    }
+
+    /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+    /// # Compatibility
+    /// The fused multiply-add operation is only available on arm/aarch64 and x86/x86-64 with the target feature ```fma```.
+    /// For the rest of targets, a regular multiplication and addition are performed
+    #[inline(always)]
+    pub fn mul_add (self, rhs: Self, add: Self) -> Self {
+        (self * rhs) + add
+    }
+
+    /// Interleaves elements of both vectors into one
+    #[inline(always)]
+    pub fn zip (self, rhs: Self) -> Self {
+        unsafe { Self(u32x4_shuffle::<0, 4, 2, 2>(self.0, rhs.0)) }
     }
 }
 

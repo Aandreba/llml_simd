@@ -64,16 +64,30 @@ macro_rules! impl_index {
             impl $target {
                 /// Returns a reference to the value in the specified lane without checking if it's within range
                 #[inline(always)]
-                pub unsafe fn index_unchecked (&self, idx: usize) -> &$ty {
+                pub unsafe fn get_unchecked (&self, idx: usize) -> &$ty {
                     let ptr = self as *const Self as *const $ty;
                     &*ptr.add(idx)
                 }
 
                 /// Returns a mutable reference to the value in the specified lane without checking if it's within range
                 #[inline(always)]
-                pub unsafe fn index_mut_unchecked (&mut self, idx: usize) -> &mut $ty {
+                pub unsafe fn get_mut_unchecked (&mut self, idx: usize) -> &mut $ty {
                     let ptr = self as *mut Self as *mut $ty;
                     &mut *ptr.add(idx)
+                }
+
+                /// Returns a reference to the value in the specified lane without checking if it's within range
+                #[deprecated(since="0.1.4", note="use ```get_unchecked``` instead")]
+                #[inline(always)]
+                pub unsafe fn index_unchecked (&self, idx: usize) -> &$ty {
+                    self.get_unchecked(idx)
+                }
+
+                /// Returns a mutable reference to the value in the specified lane without checking if it's within range
+                #[deprecated(since="0.1.4", note="use ```get_mut_unchecked``` instead")]
+                #[inline(always)]
+                pub unsafe fn index_mut_unchecked (&mut self, idx: usize) -> &mut $ty {
+                    self.get_mut_unchecked(idx)
                 }
             }
 
@@ -104,7 +118,6 @@ macro_rules! impl_index {
 
 impl_generic!(
     f32x2, f32, 2,
-    f32x3, f32, 3,
     f32x4, f32, 4,
     f32x6, f32, 6,
     f32x8, f32, 8,
@@ -114,7 +127,6 @@ impl_generic!(
     f32x16, f32, 16,
 
     f64x2, f64, 2,
-    f64x3, f64, 3,
     f64x4, f64, 4,
     f64x6, f64, 6,
     f64x8, f64, 8,
@@ -126,15 +138,12 @@ impl_generic!(
 
 impl_clone!(
     f32x2, f32, 2,
-    f32x3, f32, 3,
     f32x4, f32, 4,
-    f64x2, f64, 2,
-    f64x3, f64, 3
+    f64x2, f64, 2
 );
 
 impl_index!(
     f32x2, f32, 2,
-    f32x3, f32, 3,
     f32x4, f32, 4,
     f32x6, f32, 6,
     f32x8, f32, 8,
@@ -144,7 +153,6 @@ impl_index!(
     f32x16, f32, 16,
 
     f64x2, f64, 2,
-    f64x3, f64, 3,
     f64x4, f64, 4,
     f64x6, f64, 6,
     f64x8, f64, 8,

@@ -9,7 +9,6 @@ macro_rules! test_other {
         $(
             test_other!($fun, $($name,)?
                 [f32;2] as f32x2,
-                [f32;3] as f32x3,
                 [f32;4] as f32x4,
                 [f32;6] as f32x6,
                 [f32;8] as f32x8,
@@ -62,7 +61,6 @@ macro_rules! test_mappings {
         $(
             test_mappings!($fun, $($name,)?
                 [f32;2] as f32x2,
-                [f32;3] as f32x3,
                 [f32;4] as f32x4,
                 [f32;6] as f32x6,
                 [f32;8] as f32x8,
@@ -112,7 +110,6 @@ macro_rules! test_horiz {
         $(
             test_horiz!($fun, $($name,)?
                 [f32;2] as f32x2,
-                [f32;3] as f32x3,
                 [f32;4] as f32x4,
                 [f32;6] as f32x6,
                 [f32;8] as f32x8,
@@ -265,13 +262,37 @@ macro_rules! test_transpose {
     }
 }
 
+macro_rules! test_mul_add {
+    ($([$ty:ident;$len:literal] as $target:ident),+) => {
+        $(
+            let alpha : [$ty;$len] = random();
+            let beta : [$ty;$len] = random();
+            let gamma : [$ty;$len] = random();
+
+            let naive = (0usize..$len).into_iter()
+                .map(|i| alpha[i].mul_add(beta[i], gamma[i]));
+
+            let alpha = <$target>::new(alpha);
+            let beta = <$target>::new(beta);
+            let gamma = <$target>::new(gamma);
+            let simd = alpha.mul_add(beta, gamma);
+
+            Into::<[$ty;$len]>::into(simd)
+                .into_iter()
+                .zip(naive)
+                //.for_each(|(i, (simd, naive))| panic!("{} * {} + {} = {:?} or {:?}", alpha[i], beta[i], gamma[i], simd, naive));
+                .for_each(|(simd, naive)| assert!((simd - naive).abs() <= $ty::EPSILON * 2., concat!("mul_add for ", stringify!($target))));
+        )*
+    }
+}
+
 test_other!(
     add, sub, mul, div, 
     min as vmin, max as vmax
 );
 
 test_horiz!(
-    min, max, add as sum
+    min, max, add as sum, mul as prod
 );
 
 test_mappings!(
@@ -282,7 +303,6 @@ test_mappings!(
 pub fn index () {
     test_index!(
         [f32;2] as f32x2,
-        [f32;3] as f32x3,
         [f32;4] as f32x4,
         [f32;6] as f32x6,
         [f32;8] as f32x8,
@@ -292,7 +312,6 @@ pub fn index () {
         [f32;16] as f32x16,
     
         [f64;2] as f64x2,
-        [f64;3] as f64x3,
         [f64;4] as f64x4,
         [f64;6] as f64x6,
         [f64;8] as f64x8,
@@ -307,7 +326,6 @@ pub fn index () {
 pub fn eq () {
     test_eq!(
         [f32;2] as f32x2,
-        [f32;3] as f32x3,
         [f32;4] as f32x4,
         [f32;6] as f32x6,
         [f32;8] as f32x8,
@@ -317,7 +335,6 @@ pub fn eq () {
         [f32;16] as f32x16,
     
         [f64;2] as f64x2,
-        [f64;3] as f64x3,
         [f64;4] as f64x4,
         [f64;6] as f64x6,
         [f64;8] as f64x8,
@@ -333,7 +350,6 @@ pub fn eq () {
 pub fn rnd () {
     test_rand!(
         [f32;2] as f32x2,
-        [f32;3] as f32x3,
         [f32;4] as f32x4,
         [f32;6] as f32x6,
         [f32;8] as f32x8,
@@ -343,7 +359,6 @@ pub fn rnd () {
         [f32;16] as f32x16,
     
         [f64;2] as f64x2,
-        [f64;3] as f64x3,
         [f64;4] as f64x4,
         [f64;6] as f64x6,
         [f64;8] as f64x8,
@@ -359,7 +374,6 @@ pub fn rnd () {
 pub fn serialize () {
     test_serde!(
         [f32;2] as f32x2,
-        [f32;3] as f32x3,
         [f32;4] as f32x4,
         [f32;6] as f32x6,
         [f32;8] as f32x8,
@@ -369,7 +383,6 @@ pub fn serialize () {
         [f32;16] as f32x16,
     
         [f64;2] as f64x2,
-        [f64;3] as f64x3,
         [f64;4] as f64x4,
         [f64;6] as f64x6,
         [f64;8] as f64x8,
@@ -384,7 +397,6 @@ pub fn serialize () {
 pub fn clone () {
     test_clone!(
         [f32;2] as f32x2,
-        [f32;3] as f32x3,
         [f32;4] as f32x4,
         [f32;6] as f32x6,
         [f32;8] as f32x8,
@@ -394,7 +406,6 @@ pub fn clone () {
         [f32;16] as f32x16,
     
         [f64;2] as f64x2,
-        [f64;3] as f64x3,
         [f64;4] as f64x4,
         [f64;6] as f64x6,
         [f64;8] as f64x8,
@@ -409,7 +420,6 @@ pub fn clone () {
 pub fn into () {
     test_into!(
         [f32;2] as f32x2,
-        [f32;3] as f32x3,
         [f32;4] as f32x4,
         [f32;6] as f32x6,
         [f32;8] as f32x8,
@@ -419,7 +429,6 @@ pub fn into () {
         [f32;16] as f32x16,
     
         [f64;2] as f64x2,
-        [f64;3] as f64x3,
         [f64;4] as f64x4,
         [f64;6] as f64x6,
         [f64;8] as f64x8,
@@ -434,7 +443,6 @@ pub fn into () {
 pub fn from () {
     test_from!(
         [f32;2] as f32x2,
-        [f32;3] as f32x3,
         [f32;4] as f32x4,
         [f32;6] as f32x6,
         [f32;8] as f32x8,
@@ -444,7 +452,6 @@ pub fn from () {
         [f32;16] as f32x16,
     
         [f64;2] as f64x2,
-        [f64;3] as f64x3,
         [f64;4] as f64x4,
         [f64;6] as f64x6,
         [f64;8] as f64x8,
@@ -456,7 +463,7 @@ pub fn from () {
 }
 
 #[test]
-pub fn transp () {
+pub fn zip () {
     test_transpose!(
         [f32;2] as f32x2,
         [f32;4] as f32x4,
@@ -476,26 +483,27 @@ pub fn transp () {
         [f64;14] as f64x14,
         [f64;16] as f64x16
     );
-
-    // f32x3
-    let alpha_array : [f32;3] = random();
-    let alpha : f32x3 = alpha_array.into();
-
-    let beta_array : [f32;3] = random();
-    let beta : f32x3 = beta_array.into();
-
-    let result = [alpha[0], beta[0], alpha[1]];
-    assert_eq!(Into::<[f32;3]>::into(alpha.zip(beta)), result);
-
-    // f64x3
-    let alpha_array : [f64;3] = random();
-    let alpha : f64x3 = alpha_array.into();
-
-    let beta_array : [f64;3] = random();
-    let beta : f64x3 = beta_array.into();
-
-    let result = [alpha[0], beta[0], alpha[1]];
-    assert_eq!(Into::<[f64;3]>::into(alpha.zip(beta)), result);
 }
 
-// vtrn1q_f32
+#[test]
+pub fn fma () {
+    test_mul_add!(
+        [f32;2] as f32x2,
+        [f32;4] as f32x4,
+        [f32;6] as f32x6,
+        [f32;8] as f32x8,
+        [f32;10] as f32x10,
+        [f32;12] as f32x12,
+        [f32;14] as f32x14,
+        [f32;16] as f32x16,
+    
+        [f64;2] as f64x2,
+        [f64;4] as f64x4,
+        [f64;6] as f64x6,
+        [f64;8] as f64x8,
+        [f64;10] as f64x10,
+        [f64;12] as f64x12,
+        [f64;14] as f64x14,
+        [f64;16] as f64x16
+    );
+}

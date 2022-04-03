@@ -15,7 +15,7 @@ mod sse;
 mod special;
 
 pub use self::sse::{f32x4, f64x2};
-pub use self::special::{f32x2, f32x3};
+pub use self::special::{f32x2};
 
 cfg_if! {
     if #[cfg(all(feature = "use_avx", target_feature = "avx"))] {

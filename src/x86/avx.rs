@@ -164,8 +164,29 @@ macro_rules! impl_straight {
                     $ty,
                     min as min: "Gets the smallest/minimum value of the vector",
                     max as max: "Gets the biggest/maximum value of the vector",
-                    add as sum: "Sums up all the values inside the vector"
+                    add as sum: "Sums up all the values inside the vector",
+                    mul as prod: "Multiplies all the values inside the vector",
                 );
+
+                /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+                #[cfg(target_feature = "fma")]
+                #[inline(always)]
+                pub fn mul_add (self, rhs: Self, add: Self) -> Self {
+                    unsafe { Self(_mm_concat!(fmadd, $ty)(self.0, rhs.0, add.0)) }
+                }
+
+                /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+                #[cfg(not(target_feature = "fma"))]
+                #[inline(always)]
+                pub fn mul_add (self, rhs: Self, add: Self) -> Self {
+                    (self * rhs) + add
+                }
+
+                /// Interleaves elements of both vectors into one
+                #[inline(always)]
+                pub fn zip (self, rhs: Self) -> Self {
+                    unsafe { Self(__mm_concat!(unpackhi, $ty)(self.0, rhs.0)) }
+                }
             }
 
             impl From<$ty> for $target {

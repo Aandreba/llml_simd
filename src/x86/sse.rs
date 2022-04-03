@@ -1,4 +1,5 @@
-use core::mem::transmute;
+use core::mem::*;
+use core::ptr::*;
 use llml_simd_proc::*;
 use derive_more::*;
 use crate::x86::special::*;
@@ -180,8 +181,35 @@ macro_rules! impl_straight {
 
                 impl_hoz_fns_straight!(
                     $ty,
-                    add as sum: "Sums up all the values inside the vector"
+                    add as sum: "Sums up all the values inside the vector",
+                    mul as prod: "Multiplies all the values inside the vector"
                 );
+
+                /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+                /// # Compatibility
+                /// The fused multiply-add operation is only available on arm/aarch64 and x86/x86-64 with the target feature ```fma```.
+                /// For the rest of targets, a regular multiplication and addition are performed
+                #[cfg(target_feature = "fma")]
+                #[inline(always)]
+                pub fn mul_add (self, rhs: Self, add: Self) -> Self {
+                    unsafe { Self(_mm_concat!(fmadd, $ty)(self.0, rhs.0, add.0)) }
+                }
+
+                /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+                /// # Compatibility
+                /// The fused multiply-add operation is only available on arm/aarch64 and x86/x86-64 with the target feature ```fma```.
+                /// For the rest of targets, a regular multiplication and addition are performed
+                #[cfg(not(target_feature = "fma"))]
+                #[inline(always)]
+                pub fn mul_add (self, rhs: Self, add: Self) -> Self {
+                    (self * rhs) + add
+                }
+
+                /// Interleaves elements of both vectors into one
+                #[inline(always)]
+                pub fn zip (self, rhs: Self) -> Self {
+                    unsafe { Self(_mm_concat!(unpacklo, $ty)(self.0, rhs.0)) }
+                }
             }
 
             impl From<$ty> for $target {

@@ -81,6 +81,21 @@ impl f32x6 {
     pub fn vmax (self, rhs: Self) -> Self {
         unsafe { Self(_mm256_max_ps(self.0, rhs.0)) }
     }
+
+    /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+    /// # Compatibility
+    /// The fused multiply-add operation is only available on arm/aarch64 and x86/x86-64 with the target feature ```fma```.
+    /// For the rest of targets, a regular multiplication and addition are performed
+    #[inline(always)]
+    pub fn mul_add (self, rhs: Self, add: Self) -> Self {
+        Self(f32x8(self.0).fma(f32x8(rhs.0), f32x8(add.0)).0)
+    }
+
+    /// Interleaves elements of both vectors into one
+    #[inline(always)]
+    pub fn zip (self, rhs: Self) -> Self {
+        unsafe { _mm256_and_ps(__m256_unpacklo_ps(self.0, rhs.0), DIV_MASK) }
+    }
 }
 
 impl Add for f32x6 {
@@ -209,6 +224,12 @@ impl f64x3 {
         f64x4(self.0).sum()
     }
 
+     /// Multiplies all the values inside the vector
+     #[inline(always)]
+     pub fn prod (self) -> f64 {
+         f64x4(self.0).prod()
+     }
+
     /// Returns a vector with the smallest/minimum value of each lane
     #[inline(always)]
     pub fn vmin (self, rhs: Self) -> Self {
@@ -219,6 +240,21 @@ impl f64x3 {
     #[inline(always)]
     pub fn vmax (self, rhs: Self) -> Self {
         unsafe { Self(_mm256_max_pd(self.0, rhs.0)) }
+    }
+
+    /// Fused multiply-add. Computes `(self * a) + b` with only one rounding error.
+    /// # Compatibility
+    /// The fused multiply-add operation is only available on arm/aarch64 and x86/x86-64 with the target feature ```fma```.
+    /// For the rest of targets, a regular multiplication and addition are performed
+    #[inline(always)]
+    pub fn mul_add (self, rhs: Self, add: Self) -> Self {
+        Self(f64x4(self.0).fma(f64x4(rhs.0), f64x4(add.0)).0)
+    }
+
+    /// Interleaves elements of both vectors into one
+    #[inline(always)]
+    pub fn zip (self, rhs: Self) -> Self {
+        unsafe { _mm256_and_pd(__m256_unpacklo_pd(self.0, rhs.0), DIV_MASK) }
     }
 }
 
