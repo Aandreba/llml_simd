@@ -53,7 +53,7 @@ publish:
 	make publish-straight
 
 publish-straight:
-	make check
+	make check-linux
 	cargo test --all --all-features
 	cargo test --all --features random serialize
 	cargo publish
