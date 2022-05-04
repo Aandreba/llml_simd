@@ -74,6 +74,7 @@ fn assign_macro_impl (target: Ident, generics: Generics, original: Ident, rhs: I
 
     quote! {
         impl #assign_trait<#rhs> for #target #generics {
+            #[inline(always)]
             fn #assign_fun (&mut self, rhs: #rhs) {
                 *self = #original::<#rhs>::#original_fun(*self, rhs)
             } 

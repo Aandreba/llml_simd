@@ -1,11 +1,21 @@
 WASM := wasm
 
-check:
+check-apple:
 	cargo check --features force_naive
 	cargo check --target=aarch64-apple-darwin
 	cargo check --target=x86_64-apple-darwin
 	export RUSTFLAGS="-Ctarget-feature=+avx"
 	cargo check --target=x86_64-pc-windows-msvc
+	export RUSTFLAGS="-Ctarget-feature=+simd128"
+	cargo check --target=wasm32-unknown-unknown
+	env -u RUSTFLAGS
+
+check-linux:
+	cargo check --features force_naive
+	cargo check --target=aarch64-unknown-linux-gnu
+	cargo check --target=x86_64-unknown-linux-gnu
+	export RUSTFLAGS="-Ctarget-feature=+avx"
+	cargo check --target=x86_64-unknown-linux-gnu
 	export RUSTFLAGS="-Ctarget-feature=+simd128"
 	cargo check --target=wasm32-unknown-unknown
 	env -u RUSTFLAGS

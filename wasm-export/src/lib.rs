@@ -94,6 +94,12 @@ macro_rules! wasm_export {
                     Self(<wasm_export!(@tag $target, $ty)>::filled_with(a))
                 }
 
+                #[allow(non_snake_case)]
+                #[inline(always)]
+                pub fn intoArray (self) -> [$ty;$len] {
+                    Self(self.0.into_array())
+                }
+
                 #[inline(always)]
                 pub fn random () -> $target {
                     Self(random())

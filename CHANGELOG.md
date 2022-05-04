@@ -10,3 +10,7 @@ v0.1.4
 - Improved sqrt performance on x86/x86_64
 - Added ```prod``` and ```mul_add``` methods
 - Added ```zip``` method
+
+v0.1.5
+- Addeed ```into_array``` method
+- Bug fixes

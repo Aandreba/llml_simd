@@ -1,6 +1,6 @@
 [package]
 name = "llml_simd_proc"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 license = "MIT"
 description = "Procedural macros for llml_simd"

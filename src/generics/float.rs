@@ -31,6 +31,12 @@ macro_rules! impl_generic {
                 pub fn filled_with (a: $ty) -> $target {
                     Self::from(a)
                 }
+
+                /// Returns an array with the vector's values
+                #[inline(always)]
+                pub fn into_array (self) -> [$ty;$len] {
+                    self.into()
+                }
             }
 
             impl Debug for $target {

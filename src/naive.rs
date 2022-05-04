@@ -132,6 +132,12 @@ macro_rules! impl_naive {
                 pub fn filled_with (a: $ty) -> Self {
                     Self([a;$len])
                 }
+
+                /// Returns an array with the vector's values
+                #[inline(always)]
+                pub fn into_array (self) -> [$ty;$len] {
+                    self.0
+                }
                 
                 /// Loads values from the pointer into the SIMD vector
                 #[inline(always)]
