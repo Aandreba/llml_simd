@@ -96,8 +96,8 @@ macro_rules! wasm_export {
 
                 #[allow(non_snake_case)]
                 #[inline(always)]
-                pub fn intoArray (self) -> [$ty;$len] {
-                    Self(self.0.into_array())
+                pub fn intoArray (self) -> Box<[$ty]> {
+                    Box::new(self.0.into_array())
                 }
 
                 #[inline(always)]

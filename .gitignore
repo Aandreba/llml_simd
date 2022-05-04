@@ -5,5 +5,6 @@ Cargo.lock
 llml_simd_proc/target
 llml_simd_proc/Cargo.lock
 
+wasm/
 wasm-export/target
 wasm-export/Cargo.lock
